@@ -1,1 +1,12 @@
+com/myapp/java_miniproject/model/User.class
+com/myapp/java_miniproject/dao/UserDAO.class
+com/myapp/java_miniproject/dao/DBConnection.class
 com/myapp/AppTest.class
+com/myapp/java_miniproject/ui/LoginForm.class
+com/myapp/java_miniproject/ui/CalendarView.class
+com/myapp/java_miniproject/ui/AddEventForm.class
+com/myapp/java_miniproject/service/AuthService.class
+com/myapp/java_miniproject/Main.class
+com/myapp/java_miniproject/service/ReminderService.class
+com/myapp/java_miniproject/dao/EventDAO.class
+com/myapp/java_miniproject/model/Event.class
