@@ -28,7 +28,7 @@ public class LoginForm extends JFrame {
 
         add(panel);
 
-        btnLogin.addActionListener(e -> {
+        btnLogin.addActionListener(_ -> {
             JOptionPane.showMessageDialog(this, "Login clicked!");
         });
 

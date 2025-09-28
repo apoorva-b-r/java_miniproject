@@ -28,7 +28,7 @@ public class AddEventForm extends JFrame {
 
         add(panel);
 
-        btnSave.addActionListener(e -> JOptionPane.showMessageDialog(this, "Event saved!"));
+        btnSave.addActionListener(_ -> JOptionPane.showMessageDialog(this, "Event saved!"));
 
         setVisible(true);
     }
