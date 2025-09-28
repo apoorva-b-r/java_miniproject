@@ -1,9 +1,16 @@
 package com.myapp;
-
-public class App 
+import java.sql.Connection;
+import com.myapp.db.DatabaseConnection;
+public class App
 {
     public static void main( String[] args )
     {
-        System.out.println( "Hello World!" );
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            if (conn != null) {
+                System.out.println("Connection successful!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

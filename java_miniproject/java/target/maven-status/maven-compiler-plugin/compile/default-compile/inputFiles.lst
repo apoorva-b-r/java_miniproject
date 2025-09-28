@@ -1,1 +1,13 @@
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\App.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/App.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/Main.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/dao/DBConnection.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/dao/EventDAO.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/dao/UserDAO.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/db/DatabaseConnection.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/model/Event.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/model/User.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/service/AuthService.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/service/ReminderService.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/ui/AddEventForm.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/ui/CalendarView.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/ui/LoginForm.java
