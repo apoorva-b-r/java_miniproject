@@ -32,16 +32,16 @@ public class EventDAO {
 
     }
        // Fetch all events
-public List<Event> getAllEvents() throws SQLException {
-    List<Event> events = new ArrayList<>();
-    String sql = "SELECT * FROM events ORDER BY start_time";
+    public List<Event> getAllEvents() throws SQLException {
+        List<Event> events = new ArrayList<>();
+        String sql = "SELECT * FROM events ORDER BY start_time";
 
-    try (Connection conn = DatabaseConnection.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
 
-        while (rs.next()) {
-            Event e = new Event();  // no-arg constructor
+            while (rs.next()) {
+                Event e = new Event();  // no-arg constructor
             e.setUserId(rs.getInt("user_id"));
             e.setTitle(rs.getString("title"));
             e.setDescription(rs.getString("description"));
@@ -52,6 +52,33 @@ public List<Event> getAllEvents() throws SQLException {
             events.add(e);
         }
     }
+    return events;
+}
+// Fetch all events for a specific user
+public List<Event> getEventsByUserId(int userId) throws SQLException {
+    List<Event> events = new ArrayList<>();
+    String sql = "SELECT * FROM events WHERE user_id = ? ORDER BY start_time";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, userId);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Event e = new Event();
+                e.setUserId(rs.getInt("user_id"));
+                e.setTitle(rs.getString("title"));
+                e.setDescription(rs.getString("description"));
+                e.setStartTime(rs.getTimestamp("start_time").toLocalDateTime());
+                e.setEndTime(rs.getTimestamp("end_time").toLocalDateTime());
+                e.setReminderBeforeMinutes(rs.getInt("reminder_before_minutes"));
+                e.setStatus(rs.getString("status"));
+                events.add(e);
+            }
+        }
+    }
+
     return events;
 }
 

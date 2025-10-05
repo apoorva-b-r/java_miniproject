@@ -1,7 +1,8 @@
 package com.myapp;
 
 import com.myapp.db.DatabaseConnection;
-import com.myapp.ui.MainFrame;
+import com.myapp.ui.SignInForm;
+
 import java.sql.SQLException;
 
 public class App {
@@ -15,7 +16,8 @@ public class App {
         }
 
         javax.swing.SwingUtilities.invokeLater(() -> {
-            new MainFrame().setVisible(true);
+            SignInForm signInForm = new SignInForm();
+            signInForm.setVisible(true);
         });
     }
 }

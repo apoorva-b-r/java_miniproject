@@ -2,6 +2,7 @@ package com.myapp.ui;
 
 import com.myapp.dao.EventDAO;
 import com.myapp.model.Event;
+import com.myapp.model.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,17 +13,18 @@ public class CalendarView extends JPanel {
 
     private JTable eventTable;
     private EventTableModel tableModel;
+    private final User loggedInUser;
 
-    public CalendarView() {
+    public CalendarView(User user) {
+        this.loggedInUser = user;
         setLayout(new BorderLayout());
-        loadEventsFromDatabase(); // ✅ load initially
+        loadEventsFromDatabase(user); // ✅ load initially
     }
-
     // ✅ NEW: reloads data whenever needed
-    public void loadEventsFromDatabase() {
+    public void loadEventsFromDatabase(User user) {
         try {
             EventDAO dao = new EventDAO();
-            List<Event> events = dao.getAllEvents();
+            List<Event> events = dao.getEventsByUserId(loggedInUser.getId());
 
             if (tableModel == null) {
                 tableModel = new EventTableModel(events);

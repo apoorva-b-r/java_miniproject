@@ -1,14 +1,20 @@
 package com.myapp.ui;
 
+import com.myapp.model.User;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel contentPanel = new JPanel(cardLayout);
-    private final CalendarView calendarView = new CalendarView();
+    private final CalendarView calendarView;
+    private final User loggedInUser;
 
-    public MainFrame() {
+    public MainFrame(User user) {
+        this.loggedInUser = user; // store the logged-in user
+        this.calendarView = new CalendarView(loggedInUser); // pass user if needed for filtering
+
         setTitle("Study Productivity App");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -32,7 +38,7 @@ public class MainFrame extends JFrame {
         // --- Button actions
         calendarBtn.addActionListener(_ -> cardLayout.show(contentPanel, "calendar"));
         addEventBtn.addActionListener(_ -> {
-            AddEventForm form = new AddEventForm(calendarView);
+            AddEventForm form = new AddEventForm(calendarView, loggedInUser);
             form.setVisible(true);
         });
 

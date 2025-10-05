@@ -2,6 +2,7 @@ package com.myapp.ui;
 
 import com.myapp.dao.EventDAO;
 import com.myapp.model.Event;
+import com.myapp.model.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,9 +13,11 @@ public class AddEventForm extends JFrame {
     private JTextField txtEventName;
     private JTextField txtDate;
     private final CalendarView calendarView;
+    private final User loggedInUser;
 
-    public AddEventForm(CalendarView calendarView) {
+    public AddEventForm(CalendarView calendarView, User loggedInUser) {
         this.calendarView = calendarView;
+        this.loggedInUser=loggedInUser;
         setTitle("Add Event");
         setSize(400, 300);
         setLocationRelativeTo(null);
@@ -60,7 +63,7 @@ public class AddEventForm extends JFrame {
 
             // Build Event
             Event event = new Event();
-            event.setUserId(1); // later: replace with logged-in user id
+            event.setUserId(loggedInUser.getId());
             event.setTitle(name);
             event.setDescription("N/A");
             event.setStartTime(startTime);
@@ -74,7 +77,7 @@ public class AddEventForm extends JFrame {
                 protected Void doInBackground() throws Exception {
                     EventDAO dao = new EventDAO();
                     dao.save(event);
-                    calendarView.loadEventsFromDatabase();
+                    calendarView.loadEventsFromDatabase(loggedInUser);
                     return null;
                 }
 
