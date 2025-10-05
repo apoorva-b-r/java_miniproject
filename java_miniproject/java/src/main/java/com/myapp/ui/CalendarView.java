@@ -8,19 +8,16 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 
-public class CalendarView extends JFrame {
+public class CalendarView extends JPanel {  // <-- Changed from JFrame to JPanel
 
     private JTable eventTable;
     private EventTableModel tableModel;
 
     public CalendarView() {
-        setTitle("Calendar View");
-        setSize(600, 400);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());  // JPanel needs layout set explicitly
 
         try {
-            // Load events from DB (for now all events; later filter by user)
+            // Load events from DB
             EventDAO dao = new EventDAO();
             List<Event> events = dao.getAllEvents();
 
@@ -36,7 +33,5 @@ public class CalendarView extends JFrame {
                     "Database Error",
                     JOptionPane.ERROR_MESSAGE);
         }
-
-        setVisible(true);
     }
 }
