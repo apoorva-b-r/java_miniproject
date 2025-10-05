@@ -5,12 +5,18 @@ import javax.swing.table.AbstractTableModel;
 import java.util.List;
 
 public class EventTableModel extends AbstractTableModel {
-    private final List<Event> events;
+    private List<Event> events;
     private final String[] columns = {"User ID", "Title", "Description", "Start Time", "End Time", "Status"};
 
     public EventTableModel(List<Event> events) {
         this.events = events;
     }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
+        fireTableDataChanged();  // refresh table display automatically
+    }
+
 
     @Override
     public int getRowCount() {
