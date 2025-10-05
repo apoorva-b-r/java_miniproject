@@ -1,10 +1,12 @@
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\App.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\DBConnection.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\EventDAO.java
+D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\ReminderDAO.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\UserDAO.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\db\DatabaseConnection.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\DBconnectiontest.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\Event.java
+D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\Reminder.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\User.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\service\AuthService.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\service\ReminderService.java
