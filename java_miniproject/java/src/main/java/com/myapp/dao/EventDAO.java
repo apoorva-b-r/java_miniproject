@@ -16,7 +16,7 @@ public class EventDAO {
         String sql = "INSERT INTO events(user_id, title, description, start_time, end_time, reminder_before_minutes, status) VALUES (?,?,?,?,?,?,?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, event.getUserId());
             stmt.setString(2, event.getTitle());
@@ -28,6 +28,8 @@ public class EventDAO {
 
             stmt.executeUpdate();
         }
+        System.out.println("Saving event: " + event.getTitle() + ", user_id=" + event.getUserId());
+
     }
        // Fetch all events
 public List<Event> getAllEvents() throws SQLException {
@@ -35,8 +37,8 @@ public List<Event> getAllEvents() throws SQLException {
     String sql = "SELECT * FROM events ORDER BY start_time";
 
     try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql);
-         ResultSet rs = stmt.executeQuery()) {
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery()) {
 
         while (rs.next()) {
             Event e = new Event();  // no-arg constructor
