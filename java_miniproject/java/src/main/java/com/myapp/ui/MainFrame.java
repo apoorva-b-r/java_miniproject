@@ -32,7 +32,7 @@ public class MainFrame extends JFrame {
         // --- Button actions
         calendarBtn.addActionListener(_ -> cardLayout.show(contentPanel, "calendar"));
         addEventBtn.addActionListener(_ -> {
-            AddEventForm form = new AddEventForm();
+            AddEventForm form = new AddEventForm(calendarView);
             form.setVisible(true);
         });
 

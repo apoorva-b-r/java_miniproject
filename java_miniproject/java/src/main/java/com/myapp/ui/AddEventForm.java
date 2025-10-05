@@ -11,8 +11,10 @@ import java.time.LocalDateTime;
 public class AddEventForm extends JFrame {
     private JTextField txtEventName;
     private JTextField txtDate;
+    private final CalendarView calendarView;
 
-    public AddEventForm() {
+    public AddEventForm(CalendarView calendarView) {
+        this.calendarView = calendarView;
         setTitle("Add Event");
         setSize(400, 300);
         setLocationRelativeTo(null);
@@ -72,6 +74,7 @@ public class AddEventForm extends JFrame {
                 protected Void doInBackground() throws Exception {
                     EventDAO dao = new EventDAO();
                     dao.save(event);
+                    calendarView.loadEventsFromDatabase();
                     return null;
                 }
 
