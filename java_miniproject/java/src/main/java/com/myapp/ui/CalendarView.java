@@ -18,10 +18,11 @@ public class CalendarView extends JPanel {
     public CalendarView(User user) {
         this.loggedInUser = user;
         setLayout(new BorderLayout());
-        loadEventsFromDatabase(user); // ✅ load initially
+        loadEventsFromDatabase(); // load initially
     }
-    // ✅ NEW: reloads data whenever needed
-    public void loadEventsFromDatabase(User user) {
+
+    // ✅ No-argument method, uses stored loggedInUser
+    public void loadEventsFromDatabase() {
         try {
             EventDAO dao = new EventDAO();
             List<Event> events = dao.getEventsByUserId(loggedInUser.getId());
@@ -31,8 +32,8 @@ public class CalendarView extends JPanel {
                 eventTable = new JTable(tableModel);
                 add(new JScrollPane(eventTable), BorderLayout.CENTER);
             } else {
-                tableModel.setEvents(events);  // ✅ update the model’s data
-                tableModel.fireTableDataChanged(); // ✅ refresh the table
+                tableModel.setEvents(events);
+                tableModel.fireTableDataChanged();
             }
 
         } catch (SQLException e) {
