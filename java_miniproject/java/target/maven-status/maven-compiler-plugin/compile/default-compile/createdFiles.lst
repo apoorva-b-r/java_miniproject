@@ -15,7 +15,9 @@ com/myapp/service/ReminderService.class
 com/myapp/model/Event.class
 com/myapp/ui/AddEventForm.class
 com/myapp/model/Reminder.class
+com/myapp/ui/DashboardView.class
 com/myapp/dao/UserDAO.class
 com/myapp/ui/SignUpForm.class
 com/myapp/ui/CalendarView.class
+com/myapp/ui/ProfileView.class
 com/myapp/db/DatabaseConnection.class
