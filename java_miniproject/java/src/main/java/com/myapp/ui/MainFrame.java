@@ -69,6 +69,6 @@ public class MainFrame extends JFrame {
     }
     public void refreshAllViews() {
         dashboardView.refreshDashboard(); // ✅ reload counts
-        calendarView.loadEventsFromDatabase(loggedInUser); // ✅ reload table
+        calendarView.refreshAllTabs(); // ✅ reload table
     }
 }
