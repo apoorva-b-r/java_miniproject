@@ -60,7 +60,7 @@ public List<Event> getEventsByUserId(int userId) throws SQLException {
     String sql = "SELECT * FROM events WHERE user_id = ? ORDER BY start_time";
 
     try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
 
         stmt.setInt(1, userId);
 
@@ -78,8 +78,63 @@ public List<Event> getEventsByUserId(int userId) throws SQLException {
             }
         }
     }
-
     return events;
 }
 
+    // Fetch upcoming events for a specific user
+public List<Event> getUpcomingEvents(int userId, int limit) throws SQLException {
+    List<Event> events = new ArrayList<>();
+    String sql = "SELECT * FROM events WHERE user_id = ? AND start_time >= NOW() ORDER BY start_time ASC LIMIT ?";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, userId);
+        stmt.setInt(2, limit);
+
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            Event e = new Event();
+            e.setUserId(rs.getInt("user_id"));
+            e.setTitle(rs.getString("title"));
+            e.setDescription(rs.getString("description"));
+            e.setStartTime(rs.getTimestamp("start_time").toLocalDateTime());
+            e.setEndTime(rs.getTimestamp("end_time").toLocalDateTime());
+            e.setReminderBeforeMinutes(rs.getInt("reminder_before_minutes"));
+            e.setStatus(rs.getString("status"));
+            events.add(e);
+        }
+    }
+    return events;
+}
+
+
+    // Count total events
+    public int countEvents(int userId) throws SQLException {
+        return countByCondition(userId, "1=1");
+    }
+
+    // Count upcoming events
+    public int countUpcomingEvents(int userId) throws SQLException {
+        return countByCondition(userId, "start_time > NOW()");
+    }
+
+    // Count completed events
+    public int countCompletedEvents(int userId) throws SQLException {
+        return countByCondition(userId, "status = 'completed'");
+    }
+
+    // Helper for counting events
+    private int countByCondition(int userId, String condition) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM events WHERE user_id = ? AND " + condition;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        }
+        return 0;
+    }
 }
