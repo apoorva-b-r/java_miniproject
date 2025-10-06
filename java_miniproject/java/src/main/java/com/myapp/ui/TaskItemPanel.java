@@ -1,54 +1,36 @@
 package com.myapp.ui;
 
 import javax.swing.*;
-import java.awt.*;
+import com.myapp.model.Task;
+import com.myapp.dao.TaskDAO;
 
 public class TaskItemPanel extends JPanel {
+    private final JCheckBox checkBox;
+    private final TaskDAO taskDAO = new TaskDAO();
 
-    private boolean isDone = false;
-    private String title;
-    private String description;
-    private JCheckBox checkBox;
-    private JLabel titleLabel;
+    public TaskItemPanel(Task task) {
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-    public TaskItemPanel(String title, String description) {
-        this.title = title;
-        this.description = description;
+        checkBox = new JCheckBox(task.getTitle(), task.getStatus().equals("completed"));
+        add(checkBox);
 
-        setLayout(new BorderLayout());
-        setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-
-        checkBox = new JCheckBox();
-        titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        add(checkBox, BorderLayout.WEST);
-        add(titleLabel, BorderLayout.CENTER);
-
-        // When checkbox is clicked
+        // Update status in DB when toggled
         checkBox.addActionListener(_ -> {
-            isDone = checkBox.isSelected();
-            titleLabel.setForeground(isDone ? Color.GRAY : Color.BLACK);
-            titleLabel.setText(isDone ? "<html><strike>" + title + "</strike></html>" : title);
-        });
-
-        // When clicked → show info dialog
-        titleLabel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                showTaskDetails();
+            task.setStatus(checkBox.isSelected() ? "completed" : "scheduled");
+            try {
+                taskDAO.updateTaskStatus(task);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         });
-    }
 
-    private void showTaskDetails() {
-        JTextArea details = new JTextArea(description.isEmpty() ? "No description provided." : description);
-        details.setEditable(false);
-        details.setLineWrap(true);
-        details.setWrapStyleWord(true);
-
-        JOptionPane.showMessageDialog(this,
-                new JScrollPane(details),
-                "📋 " + title,
-                JOptionPane.INFORMATION_MESSAGE);
+        // Show task info on click
+        checkBox.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                JOptionPane.showMessageDialog(TaskItemPanel.this,
+                        "Title: " + task.getTitle() + "\nDescription: " + task.getDescription(),
+                        "Task Info", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
     }
 }
