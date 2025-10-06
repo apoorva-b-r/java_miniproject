@@ -13,13 +13,16 @@ com/myapp/ui/AddEventForm.class
 com/myapp/dao/UserDAO.class
 com/myapp/ui/SignUpForm.class
 com/myapp/ui/ProfileView.class
+com/myapp/ui/TaskItemPanel.class
 com/myapp/db/DatabaseConnection.class
 com/myapp/ui/MainFrame.class
 com/myapp/dao/EventDAO.class
 com/myapp/ui/AddEventForm$1.class
 com/myapp/service/AuthService.class
 com/myapp/DBconnectiontest.class
+com/myapp/ui/TaskListPanel.class
 com/myapp/model/Reminder.class
 com/myapp/ui/DashboardView.class
 com/myapp/ui/TasksTab.class
 com/myapp/ui/CalendarView.class
+com/myapp/ui/TaskItemPanel$1.class
