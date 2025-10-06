@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 public class AddEventForm extends JFrame {
     private JTextField txtEventName;
     private JTextField txtDate;
-    private final CalendarView calendarView;
     private final User loggedInUser;
+    private final MainFrame mainFrame;
 
-    public AddEventForm(CalendarView calendarView, User loggedInUser) {
-        this.calendarView = calendarView;
+    public AddEventForm(MainFrame mainFrame, User loggedInUser) {
+        this.mainFrame = mainFrame;
         this.loggedInUser=loggedInUser;
         setTitle("Add Event");
         setSize(400, 300);
@@ -77,14 +77,18 @@ public class AddEventForm extends JFrame {
                 protected Void doInBackground() throws Exception {
                     EventDAO dao = new EventDAO();
                     dao.save(event);
-                    calendarView.loadEventsFromDatabase(loggedInUser);
                     return null;
                 }
 
                 @Override
                 protected void done() {
-                    JOptionPane.showMessageDialog(AddEventForm.this, "Event saved to database!");
-                    dispose(); // close form
+                    try {
+                        mainFrame.refreshAllViews(); // refresh dashboard too
+                        JOptionPane.showMessageDialog(AddEventForm.this, "Event saved!");
+                        dispose();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             };
             worker.execute();

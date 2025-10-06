@@ -14,6 +14,7 @@ public class CalendarView extends JPanel {
     private JTable eventTable;
     private EventTableModel tableModel;
     private final User loggedInUser;
+    private JPanel eventsPanel;
 
     public CalendarView(User user) {
         this.loggedInUser = user;
@@ -41,5 +42,31 @@ public class CalendarView extends JPanel {
                     "Database Error",
                     JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    public void refreshEvents() {
+    eventsPanel = new JPanel();
+    eventsPanel.setLayout(new BoxLayout(eventsPanel, BoxLayout.Y_AXIS));
+    add(eventsPanel, BorderLayout.CENTER); // or wherever it should appear
+    try {
+        EventDAO dao = new EventDAO();
+        List<Event> upcomingEvents = dao.getUpcomingEvents(loggedInUser.getId(),5);
+
+        // Clear old content
+        eventsPanel.removeAll();
+
+        // Re-populate the panel
+        for (Event e : upcomingEvents) {
+            JLabel lbl = new JLabel(e.getTitle() + " - " + e.getStartTime());
+            eventsPanel.add(lbl);
+        }
+
+        // Repaint and revalidate the panel to update the UI
+        eventsPanel.revalidate();
+        eventsPanel.repaint();
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
     }
 }

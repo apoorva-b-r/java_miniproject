@@ -87,7 +87,7 @@ public List<Event> getUpcomingEvents(int userId, int limit) throws SQLException 
     String sql = "SELECT * FROM events WHERE user_id = ? AND start_time >= NOW() ORDER BY start_time ASC LIMIT ?";
 
     try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
 
         stmt.setInt(1, userId);
         stmt.setInt(2, limit);

@@ -8,31 +8,39 @@ import com.myapp.model.Event;
 import com.myapp.dao.EventDAO;
 
 public class DashboardView extends JPanel {
+    private final User loggedInUser;
+    private final JLabel lblTotal, lblUpcoming, lblCompleted;
+    private final JTextArea upcomingArea;
+    private final JTextArea statsArea;
 
     public DashboardView(User user) {
+        this.loggedInUser = user;
+
         setLayout(new BorderLayout(15, 15));
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel welcomeLabel = new JLabel("Welcome, " + user.getUsername() + " 👋", SwingConstants.CENTER);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        // --- Stats labels
+        lblTotal = new JLabel();
+        lblUpcoming = new JLabel();
+        lblCompleted = new JLabel();
 
-        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 10, 10));
-        centerPanel.setBackground(Color.WHITE);
+        JPanel statsLabelsPanel = new JPanel(new GridLayout(3,1));
+        statsLabelsPanel.add(lblTotal);
+        statsLabelsPanel.add(lblUpcoming);
+        statsLabelsPanel.add(lblCompleted);
 
-        // --- Upcoming Events
-        JTextArea upcomingArea = new JTextArea();
+        // --- Upcoming events textarea
+        upcomingArea = new JTextArea();
         upcomingArea.setEditable(false);
         upcomingArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
         upcomingArea.setBorder(BorderFactory.createTitledBorder("🗓️ Upcoming Events"));
-        populateUpcomingEvents(upcomingArea, user);
 
-        // --- Stats
-        JTextArea statsArea = new JTextArea();
+        // --- Stats textarea
+        statsArea = new JTextArea();
         statsArea.setEditable(false);
         statsArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
         statsArea.setBorder(BorderFactory.createTitledBorder("📊 Your Stats"));
-        populateStats(statsArea, user);
 
         // --- Quote
         JTextArea quoteArea = new JTextArea(getRandomQuote());
@@ -41,58 +49,65 @@ public class DashboardView extends JPanel {
         quoteArea.setBorder(BorderFactory.createTitledBorder("💪 Motivation"));
         quoteArea.setBackground(new Color(250, 250, 250));
 
+        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+        centerPanel.setBackground(Color.WHITE);
         centerPanel.add(new JScrollPane(upcomingArea));
         centerPanel.add(statsArea);
         centerPanel.add(quoteArea);
 
+        JLabel welcomeLabel = new JLabel("Welcome, " + user.getUsername() + " 👋", SwingConstants.CENTER);
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 22));
+
         add(welcomeLabel, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
+
+        refreshDashboard(); // load initial data
     }
 
-    private void populateUpcomingEvents(JTextArea area, User user) {
+    public void refreshDashboard() {
         try {
             EventDAO dao = new EventDAO();
-            List<Event> events = dao.getUpcomingEvents(user.getId(), 3);
 
+            int total = dao.countEvents(loggedInUser.getId());
+            int upcoming = dao.countUpcomingEvents(loggedInUser.getId());
+            int completed = dao.countCompletedEvents(loggedInUser.getId());
+
+            lblTotal.setText("Total Events: " + total);
+            lblUpcoming.setText("Upcoming Events: " + upcoming);
+            lblCompleted.setText("Completed Events: " + completed);
+
+            // update upcoming events textarea
+            List<Event> events = dao.getUpcomingEvents(loggedInUser.getId(), 5);
             if (events.isEmpty()) {
-                area.setText("You have no upcoming events. Add one now!");
-                return;
+                upcomingArea.setText("You have no upcoming events. Add one now!");
+            } else {
+                StringBuilder sb = new StringBuilder();
+                for (Event e : events) {
+                    sb.append(String.format("- %1$td %1$tB %1$tY — \"%2$s\" (%3$s)%n",
+                            e.getStartTime(), e.getTitle(), e.getStatus()));
+                }
+                upcomingArea.setText(sb.toString());
             }
 
-            StringBuilder sb = new StringBuilder();
-            for (Event e : events) {
-                sb.append(String.format("- %1$td %1$tB %1$tY — \"%2$s\" (%3$s)%n",
-                        e.getStartTime(), e.getTitle(), e.getStatus()));
-            }
-            area.setText(sb.toString());
-        } catch (Exception e) {
-            area.setText("Error loading events: " + e.getMessage());
-        }
-    }
-
-    private void populateStats(JTextArea area, User user) {
-        try {
-            EventDAO dao = new EventDAO();
-            int total = dao.countEvents(user.getId());
-            int upcoming = dao.countUpcomingEvents(user.getId());
-            int completed = dao.countCompletedEvents(user.getId());
-
-            area.setText(String.format(
-                "✅ Total Events: %d%n📅 Upcoming: %d%n✔️ Completed: %d",
-                total, upcoming, completed
+            // update stats textarea
+            statsArea.setText(String.format(
+                    "✅ Total Events: %d%n📅 Upcoming: %d%n✔️ Completed: %d",
+                    total, upcoming, completed
             ));
+
         } catch (Exception e) {
-            area.setText("Error loading stats: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error refreshing dashboard: " + e.getMessage());
         }
     }
 
     private String getRandomQuote() {
         String[] quotes = {
-            "“Discipline is choosing what you want most over what you want now.”",
-            "“The secret of getting ahead is getting started.” — Mark Twain",
-            "“It always seems impossible until it’s done.” — Nelson Mandela",
-            "“Don’t watch the clock; do what it does. Keep going.” — Sam Levenson",
-            "“Small steps every day lead to big results.”"
+                "“Discipline is choosing what you want most over what you want now.”",
+                "“The secret of getting ahead is getting started.” — Mark Twain",
+                "“It always seems impossible until it’s done.” — Nelson Mandela",
+                "“Don’t watch the clock; do what it does. Keep going.” — Sam Levenson",
+                "“Small steps every day lead to big results.”"
         };
         int idx = (int) (Math.random() * quotes.length);
         return quotes[idx];
