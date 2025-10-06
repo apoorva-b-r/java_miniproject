@@ -2,19 +2,21 @@ package com.myapp.ui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.myapp.dao.TaskDAO;
+import com.myapp.model.Task;
+import com.myapp.model.TaskList;
+
 public class TaskListPanel extends JPanel {
-
-    private String listTitle;
+    private final TaskList taskList;
     private JPanel tasksPanel;
-    private List<TaskItemPanel> tasks = new ArrayList<>();
+    private final TaskDAO taskDAO = new TaskDAO();
 
-    public TaskListPanel(String listTitle) {
-        this.listTitle = listTitle;
+    public TaskListPanel(TaskList list) {
+        this.taskList = list;
         setLayout(new BorderLayout(5, 5));
-        setBorder(BorderFactory.createTitledBorder(listTitle));
+        setBorder(BorderFactory.createTitledBorder(list.getTitle()));
 
         // Panel for tasks
         tasksPanel = new JPanel();
@@ -30,7 +32,7 @@ public class TaskListPanel extends JPanel {
         addTaskBtn.addActionListener(_ -> {
             String taskTitle = taskField.getText().trim();
             if (!taskTitle.isEmpty()) {
-                addNewTask(taskTitle, ""); // empty desc for now
+                addNewTask(taskTitle, ""); // you can modify to add description
                 taskField.setText("");
             }
         });
@@ -38,13 +40,62 @@ public class TaskListPanel extends JPanel {
         inputPanel.add(taskField, BorderLayout.CENTER);
         inputPanel.add(addTaskBtn, BorderLayout.EAST);
         add(inputPanel, BorderLayout.SOUTH);
+
+        // Load tasks from DB
+        loadTasks();
+    }
+
+    private void loadTasks() {
+        tasksPanel.removeAll();
+        try {
+            List<Task> tasks = taskDAO.getTasksByListId(taskList.getId());
+
+            for (Task t : tasks) {
+                JCheckBox cb = new JCheckBox(t.getTitle(), t.getStatus().equals("completed"));
+                
+                // Update status on checkbox toggle
+                cb.addActionListener(_ -> {
+                    t.setStatus(cb.isSelected() ? "completed" : "scheduled");
+                    try {
+                        taskDAO.updateTaskStatus(t);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+
+                // Show task info on click
+                cb.addMouseListener(new java.awt.event.MouseAdapter() {
+                    public void mouseClicked(java.awt.event.MouseEvent evt) {
+                        JOptionPane.showMessageDialog(TaskListPanel.this,
+                                "Title: " + t.getTitle() + "\nDescription: " + t.getDescription(),
+                                "Task Info", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                });
+
+                tasksPanel.add(cb);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        tasksPanel.revalidate();
+        tasksPanel.repaint();
     }
 
     public void addNewTask(String title, String description) {
-        TaskItemPanel task = new TaskItemPanel(title, description);
-        tasks.add(0, task); // newest first
-        tasksPanel.add(task, 0);
-        tasksPanel.revalidate();
-        tasksPanel.repaint();
+        try {
+            Task t = new Task();
+            t.setListId(taskList.getId());
+            t.setTitle(title);
+            t.setDescription(description);
+            t.setStatus("scheduled");
+
+            taskDAO.createTask(t); // save to DB
+
+            loadTasks(); // reload panel
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.myapp.dao.TaskDAO;
+import com.myapp.model.TaskList;
 import com.myapp.model.User;
 
 public class TasksTab extends JPanel {
@@ -47,24 +50,46 @@ public class TasksTab extends JPanel {
         reloadTasks();
     }
 
-    private void addNewList(String listName) {
-        TaskListPanel newList = new TaskListPanel(listName);
-        taskLists.add(0, newList); // newest first
-        listsContainer.add(newList, 0);
+private void addNewList(String listName) {
+    try {
+        TaskList newList = new TaskList();
+        newList.setTitle(listName);
+        newList.setUserId(loggedInUser.getId());
+
+        // Save to DB
+        TaskDAO dao = new TaskDAO();
+        dao.createTaskList(newList); // <-- make sure this method exists in TaskDAO
+
+        // Create the panel for UI
+        TaskListPanel newListPanel = new TaskListPanel(newList);
+        taskLists.add(0, newListPanel);
+        listsContainer.add(newListPanel, 0);
         listsContainer.revalidate();
         listsContainer.repaint();
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error adding list: " + e.getMessage());
     }
+}
 
-    public void reloadTasks() {
-        // In future, fetch user’s lists from DB
-        listsContainer.removeAll();
-        taskLists.clear();
 
-        // Example lists to show structure
-        addNewList("🧠 Study Tasks");
-        addNewList("🏫 College To-Do");
+public void reloadTasks() {
+    listsContainer.removeAll();
+    taskLists.clear();
 
+    try {
+        TaskDAO dao = new TaskDAO();
+        List<TaskList> lists = dao.getListsByUser(loggedInUser.getId());
+        for (TaskList l : lists) {
+            TaskListPanel panel = new TaskListPanel(l); // panel now accepts DB TaskList
+            taskLists.add(panel);
+            listsContainer.add(panel);
+        }
         listsContainer.revalidate();
         listsContainer.repaint();
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
+
 }
