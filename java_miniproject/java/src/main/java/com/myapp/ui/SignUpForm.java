@@ -22,6 +22,7 @@ public class SignUpForm extends JFrame {
         JLabel lblPassword = new JLabel("Password:");
         txtPassword = new JPasswordField();
         JButton btnSignUp = new JButton("Sign Up");
+        JButton btnBack = new JButton("Back to Sign In");
 
         panel.add(lblUsername);
         panel.add(txtUsername);
@@ -29,10 +30,15 @@ public class SignUpForm extends JFrame {
         panel.add(txtPassword);
         panel.add(new JLabel());
         panel.add(btnSignUp);
+        panel.add(btnBack);
 
         add(panel);
 
         btnSignUp.addActionListener(_ -> signUpUser());
+        btnBack.addActionListener(_ -> {
+            dispose();
+            new SignInForm().setVisible(true);
+        });
 
         setVisible(true);
     }
@@ -55,6 +61,7 @@ public class SignUpForm extends JFrame {
 
             JOptionPane.showMessageDialog(this, "Sign-up successful! Your user ID: " + user.getId());
             dispose(); // close the form
+            new SignInForm().setVisible(true);
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());

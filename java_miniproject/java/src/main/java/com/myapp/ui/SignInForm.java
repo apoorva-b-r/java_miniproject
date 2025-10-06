@@ -31,6 +31,7 @@ public class SignInForm extends JFrame {
         panel.add(txtPassword);
         panel.add(new JLabel());
         panel.add(btnSignIn);
+        panel.add(btnSignup);
 
         add(panel);
 
