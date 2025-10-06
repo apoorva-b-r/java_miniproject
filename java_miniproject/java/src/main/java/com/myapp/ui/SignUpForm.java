@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import com.myapp.model.User;
 import com.myapp.dao.UserDAO;
+import java.security.MessageDigest;
 
 public class SignUpForm extends JFrame {
 
@@ -12,28 +13,51 @@ public class SignUpForm extends JFrame {
 
     public SignUpForm() {
         setTitle("Sign Up");
-        setSize(400, 200);
+        setSize(400, 220);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
-        JLabel lblUsername = new JLabel("Username:");
-        txtUsername = new JTextField();
-        JLabel lblPassword = new JLabel("Password:");
-        txtPassword = new JPasswordField();
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Username Label
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(new JLabel("Username:"), gbc);
+
+        // Username Field
+        txtUsername = new JTextField(20);
+        gbc.gridx = 1;
+        panel.add(txtUsername, gbc);
+
+        // Password Label
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(new JLabel("Password:"), gbc);
+
+        // Password Field
+        txtPassword = new JPasswordField(20);
+        gbc.gridx = 1;
+        panel.add(txtPassword, gbc);
+
+        // Buttons panel
+        JPanel btnPanel = new JPanel();
         JButton btnSignUp = new JButton("Sign Up");
         JButton btnBack = new JButton("Back to Sign In");
+        btnPanel.add(btnSignUp);
+        btnPanel.add(btnBack);
 
-        panel.add(lblUsername);
-        panel.add(txtUsername);
-        panel.add(lblPassword);
-        panel.add(txtPassword);
-        panel.add(new JLabel());
-        panel.add(btnSignUp);
-        panel.add(btnBack);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(btnPanel, gbc);
 
         add(panel);
 
+        // Button actions
         btnSignUp.addActionListener(_ -> signUpUser());
         btnBack.addActionListener(_ -> {
             dispose();
@@ -45,9 +69,10 @@ public class SignUpForm extends JFrame {
 
     private void signUpUser() {
         try {
-            String username = txtUsername.getText();
-            String password = new String(txtPassword.getPassword());
-            if (username.isBlank() || password.isBlank()) {
+            String username = txtUsername.getText().trim();
+            String password = new String(txtPassword.getPassword()).trim();
+
+            if (username.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill all fields.");
                 return;
             }
@@ -60,8 +85,9 @@ public class SignUpForm extends JFrame {
             dao.createUser(user); // Make sure UserDAO has this method
 
             JOptionPane.showMessageDialog(this, "Sign-up successful! Your user ID: " + user.getId());
-            dispose(); // close the form
+            dispose();
             new SignInForm().setVisible(true);
+
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
@@ -69,11 +95,10 @@ public class SignUpForm extends JFrame {
     }
 
     private static String hashPassword(String password) throws Exception {
-        java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
         byte[] hash = md.digest(password.getBytes("UTF-8"));
         StringBuilder sb = new StringBuilder();
         for (byte b : hash) sb.append(String.format("%02x", b));
         return sb.toString();
     }
 }
-

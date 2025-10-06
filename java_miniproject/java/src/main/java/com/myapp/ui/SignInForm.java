@@ -2,9 +2,9 @@ package com.myapp.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.security.MessageDigest;
 import com.myapp.model.User;
 import com.myapp.dao.UserDAO;
-import java.security.MessageDigest;
 
 public class SignInForm extends JFrame {
 
@@ -13,31 +13,53 @@ public class SignInForm extends JFrame {
 
     public SignInForm() {
         setTitle("Sign In");
-        setSize(400, 200);
+        setSize(400, 220);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
-        JLabel lblUsername = new JLabel("Username:");
-        txtUsername = new JTextField();
-        JLabel lblPassword = new JLabel("Password:");
-        txtPassword = new JPasswordField();
-        JButton btnSignIn = new JButton("Sign In");
-        JButton btnSignup = new JButton("Sign Up");
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        panel.add(lblUsername);
-        panel.add(txtUsername);
-        panel.add(lblPassword);
-        panel.add(txtPassword);
-        panel.add(new JLabel());
-        panel.add(btnSignIn);
-        panel.add(btnSignup);
+        // Username Label
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(new JLabel("Username:"), gbc);
+
+        // Username Field
+        txtUsername = new JTextField(20);
+        gbc.gridx = 1;
+        panel.add(txtUsername, gbc);
+
+        // Password Label
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(new JLabel("Password:"), gbc);
+
+        // Password Field
+        txtPassword = new JPasswordField(20);
+        gbc.gridx = 1;
+        panel.add(txtPassword, gbc);
+
+        // Buttons panel
+        JPanel btnPanel = new JPanel();
+        JButton btnSignIn = new JButton("Sign In");
+        JButton btnSignUp = new JButton("Sign Up");
+        btnPanel.add(btnSignIn);
+        btnPanel.add(btnSignUp);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(btnPanel, gbc);
 
         add(panel);
 
+        // Button actions
         btnSignIn.addActionListener(_ -> signInUser());
-        // --- Switch to Sign-Up Form ---
-        btnSignup.addActionListener(_ -> {
+        btnSignUp.addActionListener(_ -> {
             dispose();
             new SignUpForm().setVisible(true);
         });
@@ -47,10 +69,10 @@ public class SignInForm extends JFrame {
 
     private void signInUser() {
         try {
-            String username = txtUsername.getText();
-            String password = new String(txtPassword.getPassword());
+            String username = txtUsername.getText().trim();
+            String password = new String(txtPassword.getPassword()).trim();
 
-            if (username.isBlank() || password.isBlank()) {
+            if (username.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill all fields.");
                 return;
             }
@@ -66,11 +88,8 @@ public class SignInForm extends JFrame {
             // Check password
             if (user.getPasswordHash().equals(hashPassword(password))) {
                 JOptionPane.showMessageDialog(this, "Login successful! Welcome, " + user.getUsername());
-
-                // Open main frame or calendar view for this user
                 new MainFrame(user).setVisible(true);
                 dispose(); // close login form
-
             } else {
                 JOptionPane.showMessageDialog(this, "Incorrect password!");
             }
@@ -80,9 +99,7 @@ public class SignInForm extends JFrame {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
         }
     }
-    
 
-    // Hash password same as in SignUpForm
     private static String hashPassword(String password) throws Exception {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         byte[] hash = md.digest(password.getBytes("UTF-8"));
@@ -90,5 +107,4 @@ public class SignInForm extends JFrame {
         for (byte b : hash) sb.append(String.format("%02x", b));
         return sb.toString();
     }
-
 }
