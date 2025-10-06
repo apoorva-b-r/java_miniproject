@@ -23,6 +23,7 @@ public class SignInForm extends JFrame {
         JLabel lblPassword = new JLabel("Password:");
         txtPassword = new JPasswordField();
         JButton btnSignIn = new JButton("Sign In");
+        JButton btnSignup = new JButton("Sign Up");
 
         panel.add(lblUsername);
         panel.add(txtUsername);
@@ -34,6 +35,11 @@ public class SignInForm extends JFrame {
         add(panel);
 
         btnSignIn.addActionListener(_ -> signInUser());
+        // --- Switch to Sign-Up Form ---
+        btnSignup.addActionListener(_ -> {
+            dispose();
+            new SignUpForm().setVisible(true);
+        });
 
         setVisible(true);
     }
@@ -73,6 +79,7 @@ public class SignInForm extends JFrame {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
         }
     }
+    
 
     // Hash password same as in SignUpForm
     private static String hashPassword(String password) throws Exception {
