@@ -13,7 +13,7 @@ public class TaskListPanel extends JPanel {
     private final TaskList taskList;
     private JPanel tasksPanel;
     private final TaskDAO taskDAO = new TaskDAO();
-    private List<TaskItemPanel> tasks = new ArrayList<>();
+    private List<TaskItemPanel> tasks = new ArrayList<>(); // store TaskItemPanel, not Task
 
     public TaskListPanel(TaskList list) {
         this.taskList = list;
@@ -43,32 +43,15 @@ public class TaskListPanel extends JPanel {
 
     private void loadTasks() {
         tasksPanel.removeAll();
+        tasks.clear(); // clear the panel list to avoid duplicates
+
         try {
-            List<Task> tasks = taskDAO.getTasksByListId(taskList.getId());
+            List<Task> taskListFromDB = taskDAO.getTasksByListId(taskList.getId());
 
-            for (Task t : tasks) {
-                JCheckBox cb = new JCheckBox(t.getTitle(), t.getStatus().equals("completed"));
-                
-                // Update status on checkbox toggle
-                cb.addActionListener(_ -> {
-                    t.setStatus(cb.isSelected() ? "completed" : "scheduled");
-                    try {
-                        taskDAO.updateTaskStatus(t);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                });
-
-                // Show task info on click
-                cb.addMouseListener(new java.awt.event.MouseAdapter() {
-                    public void mouseClicked(java.awt.event.MouseEvent evt) {
-                        JOptionPane.showMessageDialog(TaskListPanel.this,
-                                "Title: " + t.getTitle() + "\nDescription: " + t.getDescription(),
-                                "Task Info", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                });
-
-                tasksPanel.add(cb);
+            for (Task t : taskListFromDB) {
+                TaskItemPanel taskPanel = new TaskItemPanel(t);
+                tasks.add(taskPanel);            // add panel to list
+                tasksPanel.add(taskPanel);       // add panel to UI
             }
 
         } catch (Exception e) {
@@ -80,63 +63,61 @@ public class TaskListPanel extends JPanel {
     }
 
     public void addNewTask(String title, String description) {
-    try {
-        // 1️⃣ Create Task object
-        Task task = new Task();
-        task.setListId(taskList.getId()); // link to this list
-        task.setTitle(title);
-        task.setDescription(description);
-        task.setStatus("scheduled");
+        try {
+            // Create Task object
+            Task task = new Task();
+            task.setListId(taskList.getId());
+            task.setTitle(title);
+            task.setDescription(description);
+            task.setStatus("scheduled");
 
-        // 2️⃣ Save to DB
-        TaskDAO dao = new TaskDAO();
-        dao.createTask(task); // make sure your DAO has this method
+            // Save to DB
+            taskDAO.createTask(task);
 
-        // 3️⃣ Add to UI
-        TaskItemPanel taskPanel = new TaskItemPanel(task);
-        tasks.add(0, taskPanel); // newest first
-        tasksPanel.add(taskPanel, 0);
-        tasksPanel.revalidate();
-        tasksPanel.repaint();
+            // Add to UI
+            TaskItemPanel taskPanel = new TaskItemPanel(task);
+            tasks.add(0, taskPanel);          // newest first
+            tasksPanel.add(taskPanel, 0);
+            tasksPanel.revalidate();
+            tasksPanel.repaint();
 
-    } catch (Exception e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(this, "Error adding task: " + e.getMessage());
-    }
-}
-
-private void showAddTaskDialog() {
-    JPanel panel = new JPanel(new GridLayout(2, 2, 5, 5));
-
-    JTextField titleField = new JTextField();
-    JTextArea descArea = new JTextArea(4, 20);
-    descArea.setLineWrap(true);
-    descArea.setWrapStyleWord(true);
-    JScrollPane descScroll = new JScrollPane(descArea);
-
-    panel.add(new JLabel("Task Title:"));
-    panel.add(titleField);
-    panel.add(new JLabel("Description:"));
-    panel.add(descScroll);
-
-    int result = JOptionPane.showConfirmDialog(
-            this,
-            panel,
-            "Add New Task",
-            JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.PLAIN_MESSAGE
-    );
-
-    if (result == JOptionPane.OK_OPTION) {
-        String title = titleField.getText().trim();
-        String desc = descArea.getText().trim();
-
-        if (!title.isEmpty()) {
-            addNewTask(title, desc); // Save to DB and add to UI
-        } else {
-            JOptionPane.showMessageDialog(this, "Task title cannot be empty.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error adding task: " + e.getMessage());
         }
     }
-}
 
+    private void showAddTaskDialog() {
+        JPanel panel = new JPanel(new GridLayout(2, 2, 5, 5));
+
+        JTextField titleField = new JTextField();
+        JTextArea descArea = new JTextArea(4, 20);
+        descArea.setLineWrap(true);
+        descArea.setWrapStyleWord(true);
+        JScrollPane descScroll = new JScrollPane(descArea);
+
+        panel.add(new JLabel("Task Title:"));
+        panel.add(titleField);
+        panel.add(new JLabel("Description:"));
+        panel.add(descScroll);
+
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                panel,
+                "Add New Task",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+            String title = titleField.getText().trim();
+            String desc = descArea.getText().trim();
+
+            if (!title.isEmpty()) {
+                addNewTask(title, desc);
+            } else {
+                JOptionPane.showMessageDialog(this, "Task title cannot be empty.");
+            }
+        }
+    }
 }

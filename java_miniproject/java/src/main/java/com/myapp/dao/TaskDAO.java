@@ -125,16 +125,44 @@ public TaskList createTaskList(TaskList list) throws SQLException {
         }
     }
 
-    // Update task status (scheduled/completed)
-    public void updateTaskStatus(Task task) throws SQLException {
-        String sql = "UPDATE tasks SET status = ? WHERE id = ?";
+    // ✅ Updates only the status (completed/scheduled)
+public void updateTaskStatus(Task task) throws Exception {
+    String sql = "UPDATE tasks SET status = ? WHERE id = ?";
+    try (Connection conn = DatabaseConnection.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, task.getStatus());
+        stmt.setInt(2, task.getId());
+        stmt.executeUpdate();
+    }
+}
+
+
+    // update full task (title, description, status)
+    public boolean updateTask(Task task) throws SQLException {
+        String sql = "UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, task.getStatus());
-            stmt.setInt(2, task.getId());
-            stmt.executeUpdate();
+            stmt.setString(1, task.getTitle());
+            stmt.setString(2, task.getDescription());
+            stmt.setString(3, task.getStatus());
+            stmt.setInt(4, task.getId());
+            int rows = stmt.executeUpdate();
+            System.out.println("TaskDAO.updateTask rows=" + rows + " for id=" + task.getId());
+            return rows > 0;
         }
     }
+
+    // delete task
+    public boolean deleteTask(int id) throws SQLException {
+        String sql = "DELETE FROM tasks WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            int rows = stmt.executeUpdate();
+            System.out.println("TaskDAO.deleteTask rows=" + rows + " for id=" + id);
+            return rows > 0;
+        }
+    }
+
 
 }
