@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/App.java
 /Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/DBconnectiontest.java
 /Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/LoginLauncher.java
@@ -29,35 +28,3 @@
 /Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/ui/TaskItemPanel.java
 /Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/ui/TaskListPanel.java
 /Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/ui/TasksTab.java
-=======
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\App.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\DBConnection.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\EventDAO.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\ReminderDAO.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\TaskDAO.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\TaskListDAO.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\UserDAO.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\db\DatabaseConnection.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\DBconnectiontest.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\LoginLauncher.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\Event.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\Reminder.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\Task.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\TaskList.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\User.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\service\AuthService.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\service\ReminderService.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\AddEventForm.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\CalendarView.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\DashboardView.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\EventsTab.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\EventTableModel.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\LoginForm.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\MainFrame.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\ProfileView.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\SignInForm.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\SignUpForm.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\TaskItemPanel.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\TaskListPanel.java
-D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\TasksTab.java
->>>>>>> 8bc23170b4ac026f88085f2fc4c84774689f2635

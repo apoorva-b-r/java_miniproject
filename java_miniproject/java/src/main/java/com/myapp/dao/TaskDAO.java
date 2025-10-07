@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskDAO {
+    private List<TaskList> allLists;
+
 
     // Save a new list
     public TaskList saveList(TaskList list) throws SQLException {
@@ -85,6 +87,35 @@ public class TaskDAO {
         }
         return tasks;
     }
+
+public List<Task> getAllTasks(int userId) throws SQLException {
+    List<Task> tasks = new ArrayList<>();
+    String sql = """
+        SELECT t.id, t.list_id, t.title, t.description, t.status, t.created_at
+        FROM tasks t
+        JOIN task_lists l ON t.list_id = l.id
+        WHERE l.user_id = ?
+        ORDER BY t.created_at DESC
+    """;
+
+    try (Connection conn = DatabaseConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, userId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Task t = new Task();
+            t.setId(rs.getInt("id"));
+            t.setListId(rs.getInt("list_id"));
+            t.setTitle(rs.getString("title"));
+            t.setDescription(rs.getString("description"));
+            t.setStatus(rs.getString("status"));
+            t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+            tasks.add(t);
+        }
+    }
+    return tasks;
+}
+
 
     // In TaskDAO.java
 public TaskList createTaskList(TaskList list) throws SQLException {

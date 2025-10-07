@@ -2,10 +2,16 @@ package com.myapp.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.myapp.dao.TaskDAO;
+import com.myapp.db.DatabaseConnection;
+import com.myapp.model.Task;
 import com.myapp.model.TaskList;
 import com.myapp.model.User;
 
@@ -14,6 +20,9 @@ public class TasksTab extends JPanel {
     private final User loggedInUser;
     private JPanel listsContainer;
     private List<TaskListPanel> taskLists = new ArrayList<>();
+    private final TaskDAO taskDAO = new TaskDAO();
+    private List<TaskList> allLists;
+    private List<Task> allTasks;
 
     public TasksTab(User user) {
         this.loggedInUser = user;
@@ -45,6 +54,19 @@ public class TasksTab extends JPanel {
         addListPanel.add(newListField, BorderLayout.CENTER);
         addListPanel.add(addListBtn, BorderLayout.EAST);
         add(addListPanel, BorderLayout.SOUTH);
+
+                try {
+            // 1️⃣ Load all lists for this user
+            allLists = taskDAO.getListsByUser(loggedInUser.getId());
+
+            // 2️⃣ Load all tasks across all lists
+            allTasks = taskDAO.getAllTasks(loggedInUser.getId());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            allLists = new ArrayList<>();
+            allTasks = new ArrayList<>();
+        }
 
         // Load initial data (in future from DB)
         reloadTasks();
@@ -79,17 +101,33 @@ public void reloadTasks() {
 
     try {
         TaskDAO dao = new TaskDAO();
-        List<TaskList> lists = dao.getListsByUser(loggedInUser.getId());
-        for (TaskList l : lists) {
-            TaskListPanel panel = new TaskListPanel(l); // panel now accepts DB TaskList
-            taskLists.add(panel);
-            listsContainer.add(panel);
+        // 1️⃣ Sort all lists by creation date (newest first)
+        allLists.sort((l1, l2) -> l2.getCreatedAt().compareTo(l1.getCreatedAt()));
+
+        // 2️⃣ Add Pending Tasks panel at top
+        TaskList pendingList = new TaskList();
+        pendingList.setId(-1);  // special id
+        pendingList.setTitle("Pending Tasks");
+
+        allTasks = taskDAO.getAllTasks(loggedInUser.getId());
+        List<Task> pendingTasks = allTasks.stream()
+            .filter(t -> !t.getStatus().equals("completed"))
+            .toList();
+
+        TaskListPanel pendingPanel = new TaskListPanel(pendingList);
+        pendingPanel.loadTasks(pendingTasks);
+        listsContainer.add(pendingPanel);
+
+        // 3️⃣ Add normal lists
+        for (TaskList list : allLists) {
+        TaskListPanel panel = new TaskListPanel(list);
+        listsContainer.add(panel);
         }
+
         listsContainer.revalidate();
         listsContainer.repaint();
     } catch (Exception e) {
         e.printStackTrace();
     }
 }
-
 }

@@ -61,6 +61,19 @@ public class TaskListPanel extends JPanel {
         tasksPanel.revalidate();
         tasksPanel.repaint();
     }
+    public void loadTasks(List<Task> preloadedTasks) {
+    tasksPanel.removeAll();
+    tasks.clear();
+
+    for (Task t : preloadedTasks) {
+        TaskItemPanel taskPanel = new TaskItemPanel(t);
+        tasks.add(taskPanel);
+        tasksPanel.add(taskPanel);
+    }
+
+    tasksPanel.revalidate();
+    tasksPanel.repaint();
+    }
 
     public void addNewTask(String title, String description) {
         try {
