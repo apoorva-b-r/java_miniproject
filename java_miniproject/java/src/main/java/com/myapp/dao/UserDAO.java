@@ -11,12 +11,15 @@ public class UserDAO {
 
     // Create a new user
     public boolean createUser(User user) {
-        String sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
+        String sql = "INSERT INTO users (username, password_hash, name, mobile, gmail) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPasswordHash());
+            stmt.setString(3, user.getName());
+            stmt.setString(4, user.getMobile());
+            stmt.setString(5, user.getGmail());
 
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) return false;
@@ -46,7 +49,10 @@ public class UserDAO {
                     return new User(
                             rs.getInt("id"),
                             rs.getString("username"),
-                            rs.getString("password_hash")
+                            rs.getString("password_hash"),
+                            rs.getString("name"),
+                            rs.getString("mobile"),
+                            rs.getString("gmail")
                     );
                 }
             }
@@ -67,7 +73,10 @@ public class UserDAO {
                 return new User(
                     rs.getInt("id"),
                     rs.getString("username"),
-                    rs.getString("password_hash")
+                    rs.getString("password_hash"),
+                    rs.getString("name"),
+                    rs.getString("mobile"),
+                    rs.getString("gmail")
                 );
             }
         }
@@ -90,7 +99,10 @@ public class UserDAO {
                 users.add(new User(
                         rs.getInt("id"),
                         rs.getString("username"),
-                        rs.getString("password_hash")
+                        rs.getString("password_hash"),
+                        rs.getString("name"),
+                        rs.getString("mobile"),
+                        rs.getString("gmail")
                 ));
             }
         } catch (SQLException e) {
