@@ -2,44 +2,94 @@ package com.myapp.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.myapp.dao.TaskDAO;
+import com.myapp.model.TaskList;
 import com.myapp.model.User;
 
 public class TasksTab extends JPanel {
 
     private final User loggedInUser;
-    private DefaultListModel<String> taskListModel;
+    private JPanel listsContainer;
+    private List<TaskListPanel> taskLists = new ArrayList<>();
 
     public TasksTab(User user) {
         this.loggedInUser = user;
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10));
 
-        JLabel title = new JLabel("✅ To-Do List", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 18));
+        JLabel title = new JLabel("🗂️ Your To-Do Lists", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
         add(title, BorderLayout.NORTH);
 
-        taskListModel = new DefaultListModel<>();
-        JList<String> taskList = new JList<>(taskListModel);
+        // Container for all lists
+        listsContainer = new JPanel();
+        listsContainer.setLayout(new BoxLayout(listsContainer, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane = new JScrollPane(listsContainer);
+        add(scrollPane, BorderLayout.CENTER);
 
-        JTextField newTaskField = new JTextField();
-        JButton addTaskButton = new JButton("Add Task");
+        // Panel to add new list
+        JPanel addListPanel = new JPanel(new BorderLayout(5, 5));
+        JTextField newListField = new JTextField();
+        JButton addListBtn = new JButton("➕ Add List");
 
-        addTaskButton.addActionListener(_ -> {
-            String task = newTaskField.getText().trim();
-            if (!task.isEmpty()) {
-                taskListModel.addElement(task);
-                newTaskField.setText("");
+        addListBtn.addActionListener(_ -> {
+            String listName = newListField.getText().trim();
+            if (!listName.isEmpty()) {
+                addNewList(listName);
+                newListField.setText("");
             }
         });
 
-        JPanel inputPanel = new JPanel(new BorderLayout());
-        inputPanel.add(newTaskField, BorderLayout.CENTER);
-        inputPanel.add(addTaskButton, BorderLayout.EAST);
+        addListPanel.add(newListField, BorderLayout.CENTER);
+        addListPanel.add(addListBtn, BorderLayout.EAST);
+        add(addListPanel, BorderLayout.SOUTH);
 
-        add(new JScrollPane(taskList), BorderLayout.CENTER);
-        add(inputPanel, BorderLayout.SOUTH);
+        // Load initial data (in future from DB)
+        reloadTasks();
     }
 
-    public void reloadTasks() {
-        // In the future, load from DB using TaskDAO
+private void addNewList(String listName) {
+    try {
+        TaskList newList = new TaskList();
+        newList.setTitle(listName);
+        newList.setUserId(loggedInUser.getId());
+
+        // Save to DB
+        TaskDAO dao = new TaskDAO();
+        dao.createTaskList(newList); // <-- make sure this method exists in TaskDAO
+
+        // Create the panel for UI
+        TaskListPanel newListPanel = new TaskListPanel(newList);
+        taskLists.add(0, newListPanel);
+        listsContainer.add(newListPanel, 0);
+        listsContainer.revalidate();
+        listsContainer.repaint();
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error adding list: " + e.getMessage());
     }
+}
+
+
+public void reloadTasks() {
+    listsContainer.removeAll();
+    taskLists.clear();
+
+    try {
+        TaskDAO dao = new TaskDAO();
+        List<TaskList> lists = dao.getListsByUser(loggedInUser.getId());
+        for (TaskList l : lists) {
+            TaskListPanel panel = new TaskListPanel(l); // panel now accepts DB TaskList
+            taskLists.add(panel);
+            listsContainer.add(panel);
+        }
+        listsContainer.revalidate();
+        listsContainer.repaint();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
 }

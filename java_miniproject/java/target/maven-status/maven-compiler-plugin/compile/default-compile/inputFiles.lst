@@ -4,10 +4,14 @@ D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\ReminderDAO.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\dao\UserDAO.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\db\DatabaseConnection.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/dao/TaskDAO.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/dao/TaskListDAO.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\DBconnectiontest.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\LoginLauncher.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\Event.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\Reminder.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/model/Task.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/model/TaskList.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\model\User.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\service\AuthService.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\service\ReminderService.java
@@ -21,4 +25,6 @@ D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\M
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\ProfileView.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\SignInForm.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\SignUpForm.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/ui/TaskItemPanel.java
+/Users/Apoorva/java_miniproject/java_miniproject/java/src/main/java/com/myapp/ui/TaskListPanel.java
 D:\javaminty\java_miniproject\java_miniproject\java\src\main\java\com\myapp\ui\TasksTab.java
