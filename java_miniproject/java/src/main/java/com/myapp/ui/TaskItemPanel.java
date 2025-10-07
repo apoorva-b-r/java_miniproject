@@ -1,22 +1,33 @@
 package com.myapp.ui;
 
 import javax.swing.*;
+import java.awt.*;
 import com.myapp.model.Task;
 import com.myapp.dao.TaskDAO;
 
 public class TaskItemPanel extends JPanel {
+    private final Task task;
     private final JCheckBox checkBox;
+    private final JLabel titleLabel;
     private final TaskDAO taskDAO = new TaskDAO();
 
     public TaskItemPanel(Task task) {
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        this.task = task;
+        setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        checkBox = new JCheckBox(task.getTitle(), task.getStatus().equals("completed"));
+        // Only checkbox toggles completion
+        checkBox = new JCheckBox();
+        checkBox.setSelected(task.getStatus().equals("completed"));
         add(checkBox);
 
-        // Update status in DB when toggled
+        // Label displays task title
+        titleLabel = new JLabel(task.getTitle());
+        titleLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        add(titleLabel);
+
+        // Checkbox action — only updates status
         checkBox.addActionListener(_ -> {
-            task.setStatus(checkBox.isSelected() ? "completed" : "scheduled");
+            this.task.setStatus(checkBox.isSelected() ? "completed" : "scheduled");
             try {
                 taskDAO.updateTaskStatus(task);
             } catch (Exception ex) {
@@ -24,8 +35,8 @@ public class TaskItemPanel extends JPanel {
             }
         });
 
-        // Show task info on click
-        checkBox.addMouseListener(new java.awt.event.MouseAdapter() {
+        // Click on label shows info
+        titleLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 JOptionPane.showMessageDialog(TaskItemPanel.this,
                         "Title: " + task.getTitle() + "\nDescription: " + task.getDescription(),
