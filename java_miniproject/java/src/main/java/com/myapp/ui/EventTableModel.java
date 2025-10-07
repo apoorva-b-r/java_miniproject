@@ -6,7 +6,7 @@ import java.util.List;
 
 public class EventTableModel extends AbstractTableModel {
     private List<Event> events;
-    private final String[] columns = {"User ID", "Title", "Description", "Start Time", "End Time", "Status"};
+    private final String[] columns = {"Title", "Description", "Start Time", "End Time", "Status"};
 
     public EventTableModel(List<Event> events) {
         this.events = events;
@@ -20,7 +20,7 @@ public class EventTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return events.size();
+        return events == null ? 0 : events.size();
     }
 
     @Override
@@ -35,14 +35,13 @@ public class EventTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        if (events == null || rowIndex >= events.size()) return null;
         Event e = events.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> e.getUserId();
-            case 1 -> e.getTitle();
-            case 2 -> e.getDescription();
-            case 3 -> e.getStartTime();
-            case 4 -> e.getEndTime();
-            case 5 -> e.getStatus();
+            case 0 -> e.getTitle();
+            case 1 -> e.getDescription();
+            case 2 -> e.getStartTime();
+            case 3 -> e.getEndTime();
             default -> null;
         };
     }

@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class AddEventForm extends JFrame {
     private JTextField txtTitle;
@@ -15,7 +16,6 @@ public class AddEventForm extends JFrame {
     private JTextField txtStartTime;
     private JTextField txtEndTime;
     private JTextField txtReminder;
-    private JComboBox<String> cmbStatus;
 
     private final User loggedInUser;
     private final MainFrame mainFrame;
@@ -25,11 +25,14 @@ public class AddEventForm extends JFrame {
         this.loggedInUser = loggedInUser;
 
         setTitle("Add Event");
-        setSize(450, 500);
+        setSize(450, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        JPanel panel = new JPanel(new GridLayout(7, 2, 10, 10));
+        initUI();
+        setVisible(true);
+    }
+        private void initUI() {
+        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel lblTitle = new JLabel("Event Title:");
@@ -48,14 +51,10 @@ public class AddEventForm extends JFrame {
         txtEndTime = new JTextField();
 
         JLabel lblReminder = new JLabel("Reminder (minutes before):");
-        txtReminder = new JTextField("10");
-
-        JLabel lblStatus = new JLabel("Status:");
-        cmbStatus = new JComboBox<>(new String[]{"scheduled", "completed", "cancelled"});
+        txtReminder = new JTextField("24");
 
         JButton btnSave = new JButton("Save");
 
-        // Add components to panel
         panel.add(lblTitle);
         panel.add(txtTitle);
         panel.add(lblDescription);
@@ -66,71 +65,101 @@ public class AddEventForm extends JFrame {
         panel.add(txtEndTime);
         panel.add(lblReminder);
         panel.add(txtReminder);
-        panel.add(lblStatus);
-        panel.add(cmbStatus);
         panel.add(new JLabel());
         panel.add(btnSave);
 
         add(panel);
-        setVisible(true);
 
         btnSave.addActionListener(_ -> saveEvent());
     }
 
     private void saveEvent() {
-        try {
-            String title = txtTitle.getText().trim();
-            String description = txtDescription.getText().trim();
-            String startStr = txtStartTime.getText().trim();
-            String endStr = txtEndTime.getText().trim();
-            String reminderStr = txtReminder.getText().trim();
-            String status = (String) cmbStatus.getSelectedItem();
+        String title = txtTitle.getText().trim();
+        String description = txtDescription.getText().trim();
+        String startStr = txtStartTime.getText().trim();
+        String endStr = txtEndTime.getText().trim();
+        String reminderStr = txtReminder.getText().trim();
 
-            // Validation
-            if (title.isEmpty() || startStr.isEmpty() || endStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill all required fields (Title, Start, End).");
+        // Basic validation
+        if (title.isEmpty() || startStr.isEmpty() || endStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Please fill all required fields (Title, Start, End).",
+                    "Validation Error",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime startTime, endTime;
+        int reminder = 24;
+
+        try {
+            startTime = LocalDateTime.parse(startStr, formatter);
+            endTime = LocalDateTime.parse(endStr, formatter);
+
+            if (!endTime.isAfter(startTime)) {
+                JOptionPane.showMessageDialog(this,
+                        "End time must be after start time.",
+                        "Validation Error",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            LocalDateTime startTime = LocalDateTime.parse(startStr, formatter);
-            LocalDateTime endTime = LocalDateTime.parse(endStr, formatter);
-            int reminder = Integer.parseInt(reminderStr);
+            if (!reminderStr.isEmpty()) {
+                reminder = Integer.parseInt(reminderStr);
+                if (reminder < 0) throw new NumberFormatException();
+            }
 
-            Event event = new Event();
-            event.setUserId(loggedInUser.getId());
-            event.setTitle(title);
-            event.setDescription(description);
-            event.setStartTime(startTime);
-            event.setEndTime(endTime);
-            event.setReminderBeforeMinutes(reminder);
-            event.setStatus(status);
-
-            // Background thread save
-            SwingWorker<Void, Void> worker = new SwingWorker<>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    EventDAO dao = new EventDAO();
-                    dao.save(event);
-                    return null;
-                }
-
-                @Override
-                protected void done() {
-                    try {
-                        mainFrame.refreshAllViews();
-                        JOptionPane.showMessageDialog(AddEventForm.this, "Event added successfully!");
-                        dispose();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            };
-            worker.execute();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        } catch (DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Invalid date/time format. Use yyyy-MM-dd HH:mm",
+                    "Validation Error",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Reminder must be a non-negative number.",
+                    "Validation Error",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
         }
+
+        // Create Event object
+        Event event = new Event();
+        event.setUserId(loggedInUser.getId());
+        event.setTitle(title);
+        event.setDescription(description);
+        event.setStartTime(startTime);
+        event.setEndTime(endTime);
+        event.setReminderBeforeMinutes(reminder);
+
+        // Save in background thread
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                EventDAO dao = new EventDAO();
+                dao.save(event);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    mainFrame.refreshAllViews(); // Refresh calendar events immediately
+                    JOptionPane.showMessageDialog(AddEventForm.this,
+                            "Event added successfully!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    dispose();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(AddEventForm.this,
+                            "Error saving event: " + ex.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        worker.execute();
     }
 }

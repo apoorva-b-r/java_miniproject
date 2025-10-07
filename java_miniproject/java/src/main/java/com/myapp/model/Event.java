@@ -9,7 +9,8 @@ public class Event {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private int reminderBeforeMinutes;
-    private String status;
+    private LocalDateTime originalStartTime;  
+    private LocalDateTime createdAt;
 
     // Constructor
     public Event() {
@@ -18,8 +19,9 @@ public class Event {
         this.description = "";
         this.startTime = LocalDateTime.now();
         this.endTime = LocalDateTime.now().plusHours(1);
-        this.reminderBeforeMinutes = 10;
-        this.status = "scheduled";
+        this.reminderBeforeMinutes = 24;
+        this.originalStartTime = this.startTime;
+        this.createdAt = LocalDateTime.now();
     }
     
 
@@ -30,7 +32,9 @@ public class Event {
     public LocalDateTime getStartTime() { return startTime; }
     public LocalDateTime getEndTime() { return endTime; }
     public int getReminderBeforeMinutes() { return reminderBeforeMinutes; }
-    public String getStatus() { return status; }
+    public LocalDateTime getOriginalStartTime() { return originalStartTime; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+
 
         // --- Setters ---
     public void setUserId(int userId) { this.userId = userId; }
@@ -39,6 +43,7 @@ public class Event {
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
     public void setReminderBeforeMinutes(int reminderBeforeMinutes) { this.reminderBeforeMinutes = reminderBeforeMinutes; }
-    public void setStatus(String status) { this.status = status; }
+    public void setOriginalStartTime(LocalDateTime originalStartTime) { this.originalStartTime = originalStartTime; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
 
