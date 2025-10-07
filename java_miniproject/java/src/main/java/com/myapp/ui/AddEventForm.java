@@ -19,19 +19,27 @@ public class AddEventForm extends JFrame {
 
     private final User loggedInUser;
     private final MainFrame mainFrame;
+    private Event eventBeingEdited;
+public AddEventForm(MainFrame mainFrame, User loggedInUser) {
+        this(mainFrame, loggedInUser, null);
+    }
 
-    public AddEventForm(MainFrame mainFrame, User loggedInUser) {
+    // Constructor for editing existing event
+    public AddEventForm(MainFrame mainFrame, User loggedInUser, Event eventToEdit) {
         this.mainFrame = mainFrame;
         this.loggedInUser = loggedInUser;
+        this.eventBeingEdited = eventToEdit;
 
-        setTitle("Add Event");
+        setTitle(eventToEdit == null ? "Add Event" : "Edit Event");
         setSize(450, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         initUI();
+        if (eventToEdit != null) populateFields(eventToEdit);
         setVisible(true);
     }
-        private void initUI() {
+
+    private void initUI() {
         JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -73,6 +81,14 @@ public class AddEventForm extends JFrame {
         btnSave.addActionListener(_ -> saveEvent());
     }
 
+    private void populateFields(Event e) {
+        txtTitle.setText(e.getTitle());
+        txtDescription.setText(e.getDescription());
+        txtStartTime.setText(e.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        txtEndTime.setText(e.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        txtReminder.setText(String.valueOf(e.getReminderBeforeMinutes()));
+    }
+
     private void saveEvent() {
         String title = txtTitle.getText().trim();
         String description = txtDescription.getText().trim();
@@ -80,7 +96,6 @@ public class AddEventForm extends JFrame {
         String endStr = txtEndTime.getText().trim();
         String reminderStr = txtReminder.getText().trim();
 
-        // Basic validation
         if (title.isEmpty() || startStr.isEmpty() || endStr.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Please fill all required fields (Title, Start, End).",
@@ -124,8 +139,7 @@ public class AddEventForm extends JFrame {
             return;
         }
 
-        // Create Event object
-        Event event = new Event();
+        Event event = (eventBeingEdited != null) ? eventBeingEdited : new Event();
         event.setUserId(loggedInUser.getId());
         event.setTitle(title);
         event.setDescription(description);
@@ -133,21 +147,24 @@ public class AddEventForm extends JFrame {
         event.setEndTime(endTime);
         event.setReminderBeforeMinutes(reminder);
 
-        // Save in background thread
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() throws Exception {
                 EventDAO dao = new EventDAO();
-                dao.save(event);
+                if (eventBeingEdited != null) {
+                    dao.update(event); // call update for existing
+                } else {
+                    dao.save(event);   // call save for new
+                }
                 return null;
             }
 
             @Override
             protected void done() {
                 try {
-                    mainFrame.refreshAllViews(); // Refresh calendar events immediately
+                    mainFrame.refreshAllViews();
                     JOptionPane.showMessageDialog(AddEventForm.this,
-                            "Event added successfully!",
+                            eventBeingEdited != null ? "Event updated successfully!" : "Event added successfully!",
                             "Success",
                             JOptionPane.INFORMATION_MESSAGE);
                     dispose();

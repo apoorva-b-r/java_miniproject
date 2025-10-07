@@ -38,7 +38,6 @@ public class EventsTab extends JPanel {
         topPanel.add(monthLabel, BorderLayout.CENTER);
         topPanel.add(nextBtn, BorderLayout.EAST);
         topPanel.add(addEventBtn, BorderLayout.SOUTH);
-
         add(topPanel, BorderLayout.NORTH);
 
         // Calendar panel
@@ -62,7 +61,10 @@ public class EventsTab extends JPanel {
         });
 
         // Add Event button
-        addEventBtn.addActionListener(_ -> new AddEventForm(mainFrame, loggedInUser).setVisible(true));
+        addEventBtn.addActionListener(_ -> {
+            AddEventForm form = new AddEventForm(mainFrame, loggedInUser);
+            form.setVisible(true);
+        });
     }
 
     private void loadCalendar() {
@@ -123,17 +125,50 @@ public class EventsTab extends JPanel {
     }
 
     private void showEventDetails(Event e) {
-        JOptionPane.showMessageDialog(this,
-                "Title: " + e.getTitle() + "\n" +
+        Object[] options = {"Edit","Delete","Close"};
+        int choice = JOptionPane.showOptionDialog(this,
+                        "Title: " + e.getTitle() + "\n" +
                         "Description: " + e.getDescription() + "\n" +
                         "Start: " + e.getStartTime() + "\n" +
                         "End: " + e.getEndTime() + "\n" +
                         "Reminder: " + e.getReminderBeforeMinutes() + " mins before",
-                "Event Details",
-                JOptionPane.INFORMATION_MESSAGE);
+                        "Event Details",
+                        JOptionPane.YES_NO_CANCEL_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        null,
+                        options,
+                        options[2]);
+        if (choice == JOptionPane.YES_OPTION){
+            editEvent(e);
+        } else if (choice == JOptionPane.NO_OPTION){
+            deleteEvent(e);
+        }
     }
 
     public void refreshEvents() {
         loadCalendar();
+    }
+
+    private void editEvent(Event event) {
+        AddEventForm form = new AddEventForm(mainFrame, loggedInUser, event);
+        form.setVisible(true);
+    }
+
+    private void deleteEvent(Event event) {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to delete this event?",
+                "Delete Event",
+                JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                EventDAO dao = new EventDAO();
+                dao.delete(event.getId());
+                refreshEvents();
+                JOptionPane.showMessageDialog(this, "Event deleted successfully!");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Failed to delete event.");
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.myapp.model;
 import java.time.LocalDateTime;
 
 public class Event {
+    private int id;
     private int userId;
     private String title;
     private String description;
@@ -26,6 +27,7 @@ public class Event {
     
 
     // Getters
+    public int getId() { return id; }
     public int getUserId() { return userId; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
@@ -37,6 +39,7 @@ public class Event {
 
 
         // --- Setters ---
+    public void setId(int id) { this.id = id; }
     public void setUserId(int userId) { this.userId = userId; }
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }
