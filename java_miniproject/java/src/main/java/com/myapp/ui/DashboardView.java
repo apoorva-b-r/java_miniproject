@@ -9,7 +9,7 @@ import com.myapp.dao.EventDAO;
 
 public class DashboardView extends JPanel {
     private final User loggedInUser;
-    private final JLabel lblTotal, lblUpcoming, lblCompleted;
+    private final JLabel lblTotal, lblUpcoming;
     private final JTextArea upcomingArea;
     private final JTextArea statsArea;
 
@@ -23,12 +23,10 @@ public class DashboardView extends JPanel {
         // --- Stats labels
         lblTotal = new JLabel();
         lblUpcoming = new JLabel();
-        lblCompleted = new JLabel();
 
-        JPanel statsLabelsPanel = new JPanel(new GridLayout(3,1));
+        JPanel statsLabelsPanel = new JPanel(new GridLayout(2,1));
         statsLabelsPanel.add(lblTotal);
         statsLabelsPanel.add(lblUpcoming);
-        statsLabelsPanel.add(lblCompleted);
 
         // --- Upcoming events textarea
         upcomingArea = new JTextArea();
@@ -70,11 +68,10 @@ public class DashboardView extends JPanel {
 
             int total = dao.countEvents(loggedInUser.getId());
             int upcoming = dao.countUpcomingEvents(loggedInUser.getId());
-            int completed = dao.countCompletedEvents(loggedInUser.getId());
+
 
             lblTotal.setText("Total Events: " + total);
             lblUpcoming.setText("Upcoming Events: " + upcoming);
-            lblCompleted.setText("Completed Events: " + completed);
 
             // update upcoming events textarea
             List<Event> events = dao.getUpcomingEvents(loggedInUser.getId(), 5);
@@ -83,16 +80,16 @@ public class DashboardView extends JPanel {
             } else {
                 StringBuilder sb = new StringBuilder();
                 for (Event e : events) {
-                    sb.append(String.format("- %1$td %1$tB %1$tY — \"%2$s\" (%3$s)%n",
-                            e.getStartTime(), e.getTitle(), e.getStatus()));
+                    sb.append(String.format("- %1$td %1$tB %1$tY — \"%2$s\" %n",
+                            e.getStartTime(), e.getTitle()));
                 }
                 upcomingArea.setText(sb.toString());
             }
 
             // update stats textarea
             statsArea.setText(String.format(
-                    "✅ Total Events: %d%n📅 Upcoming: %d%n✔️ Completed: %d",
-                    total, upcoming, completed
+                    "✅ Total Events: %d%n📅 Upcoming: %d%n✔️ ",
+                    total, upcoming
             ));
 
         } catch (Exception e) {
