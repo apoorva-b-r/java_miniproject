@@ -13,6 +13,7 @@ public class MainFrame extends JFrame {
     private final EventsTab eventsTab;
     private final TasksTab tasksTab;
     private final User loggedInUser;
+    private final SubjectsTab subjectsTab;
 
     public MainFrame(User user) {
         this.loggedInUser = user;
@@ -21,6 +22,7 @@ public class MainFrame extends JFrame {
         calendarView = new CalendarView(loggedInUser);
         eventsTab = new EventsTab(loggedInUser, this);
         tasksTab = new TasksTab(loggedInUser);
+        subjectsTab = new SubjectsTab(loggedInUser);
 
         setTitle("Study Productivity App");
         setSize(900, 600);
@@ -36,6 +38,7 @@ public class MainFrame extends JFrame {
         JButton btnTasks = new JButton("🧾 Tasks");
         JButton btnProfile = new JButton("👤 Profile");
         JButton btnLogout = new JButton("🚪 Logout");
+        JButton btnSubjects = new JButton("📚 Subjects");
 
         sidePanel.add(Box.createVerticalGlue());
         sidePanel.add(btnHome);
@@ -47,12 +50,15 @@ public class MainFrame extends JFrame {
         sidePanel.add(btnProfile);
         sidePanel.add(Box.createRigidArea(new Dimension(0, 10)));
         sidePanel.add(btnLogout);
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidePanel.add(btnSubjects);
         sidePanel.add(Box.createVerticalGlue());
 
         contentPanel.add(dashboardView, "dashboard");
         contentPanel.add(eventsTab, "events");
         contentPanel.add(tasksTab, "tasks");
         contentPanel.add(calendarView, "calendar");
+        contentPanel.add(subjectsTab, "subjects");
 
         add(sidePanel, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
@@ -67,6 +73,7 @@ public class MainFrame extends JFrame {
             dispose();
             new SignInForm().setVisible(true);
         });
+        btnSubjects.addActionListener(_ -> cardLayout.show(contentPanel, "subjects"));
 
         setVisible(true);
     }
