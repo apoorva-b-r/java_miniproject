@@ -9,24 +9,23 @@ public class Event {
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private int reminderBeforeMinutes;
-    private LocalDateTime originalStartTime;  
+    private int reminderBeforeMinutes; // reminder in minutes
+    private LocalDateTime originalStartTime;
     private LocalDateTime createdAt;
 
-    // Constructor
+    // --- Constructor ---
     public Event() {
         this.userId = 0;
         this.title = "";
         this.description = "";
         this.startTime = LocalDateTime.now();
         this.endTime = LocalDateTime.now().plusHours(1);
-        this.reminderBeforeMinutes = 24;
+        this.reminderBeforeMinutes = 24 * 60; // Default reminder: 24 hours before
         this.originalStartTime = this.startTime;
         this.createdAt = LocalDateTime.now();
     }
-    
 
-    // Getters
+    // --- Getters ---
     public int getId() { return id; }
     public int getUserId() { return userId; }
     public String getTitle() { return title; }
@@ -37,8 +36,7 @@ public class Event {
     public LocalDateTime getOriginalStartTime() { return originalStartTime; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 
-
-        // --- Setters ---
+    // --- Setters ---
     public void setId(int id) { this.id = id; }
     public void setUserId(int userId) { this.userId = userId; }
     public void setTitle(String title) { this.title = title; }
@@ -49,4 +47,3 @@ public class Event {
     public void setOriginalStartTime(LocalDateTime originalStartTime) { this.originalStartTime = originalStartTime; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
-

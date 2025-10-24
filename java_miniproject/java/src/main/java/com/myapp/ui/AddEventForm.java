@@ -58,7 +58,7 @@ public AddEventForm(MainFrame mainFrame, User loggedInUser) {
         JLabel lblEnd = new JLabel("End Time (yyyy-MM-dd HH:mm):");
         txtEndTime = new JTextField();
 
-        JLabel lblReminder = new JLabel("Reminder (minutes before):");
+        JLabel lblReminder = new JLabel("Reminder (hours before):");
         txtReminder = new JTextField("24");
 
         JButton btnSave = new JButton("Save");
@@ -86,7 +86,7 @@ public AddEventForm(MainFrame mainFrame, User loggedInUser) {
         txtDescription.setText(e.getDescription());
         txtStartTime.setText(e.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         txtEndTime.setText(e.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-        txtReminder.setText(String.valueOf(e.getReminderBeforeMinutes()));
+        txtReminder.setText(String.valueOf(e.getReminderBeforeMinutes()/60));
     }
 
     private void saveEvent() {
@@ -145,7 +145,7 @@ public AddEventForm(MainFrame mainFrame, User loggedInUser) {
         event.setDescription(description);
         event.setStartTime(startTime);
         event.setEndTime(endTime);
-        event.setReminderBeforeMinutes(reminder);
+        event.setReminderBeforeMinutes(reminder * 60);
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
