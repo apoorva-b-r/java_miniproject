@@ -141,4 +141,7 @@ public void reloadTasks() {
         e.printStackTrace();
     }
 }
+public void refreshTasks() {
+    reloadTasks();
+}
 }
