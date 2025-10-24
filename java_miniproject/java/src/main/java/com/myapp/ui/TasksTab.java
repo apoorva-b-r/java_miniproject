@@ -33,10 +33,14 @@ public class TasksTab extends JPanel {
         add(title, BorderLayout.NORTH);
 
         // Container for all lists
+
         listsContainer = new JPanel();
-        listsContainer.setLayout(new BoxLayout(listsContainer, BoxLayout.Y_AXIS));
+        listsContainer.setLayout(new GridLayout(0, 2, 10, 10)); // 2 columns, auto rows, 10px gap
         JScrollPane scrollPane = new JScrollPane(listsContainer);
         add(scrollPane, BorderLayout.CENTER);
+
+        listsContainer.revalidate();
+        listsContainer.repaint();
 
         // Panel to add new list
         JPanel addListPanel = new JPanel(new BorderLayout(5, 5));
@@ -67,10 +71,18 @@ public class TasksTab extends JPanel {
             allLists = new ArrayList<>();
             allTasks = new ArrayList<>();
         }
+        
+        // Add cards
+        for (TaskList list : allLists) {
+        TaskListPanel card = new TaskListPanel(list);
+        listsContainer.add(card);
+        }
 
         // Load initial data (in future from DB)
         reloadTasks();
     }
+
+    
 
 private void addNewList(String listName) {
     try {
@@ -100,16 +112,14 @@ public void reloadTasks() {
     taskLists.clear();
 
     try {
-        TaskDAO dao = new TaskDAO();
-        // 1️⃣ Sort all lists by creation date (newest first)
-        allLists.sort((l1, l2) -> l2.getCreatedAt().compareTo(l1.getCreatedAt()));
+        allLists = taskDAO.getListsByUser(loggedInUser.getId());
+        allTasks = taskDAO.getAllTasks(loggedInUser.getId());
 
-        // 2️⃣ Add Pending Tasks panel at top
+        // Pending tasks panel
         TaskList pendingList = new TaskList();
-        pendingList.setId(-1);  // special id
+        pendingList.setId(-1);
         pendingList.setTitle("Pending Tasks");
 
-        allTasks = taskDAO.getAllTasks(loggedInUser.getId());
         List<Task> pendingTasks = allTasks.stream()
             .filter(t -> !t.getStatus().equals("completed"))
             .toList();
@@ -118,10 +128,11 @@ public void reloadTasks() {
         pendingPanel.loadTasks(pendingTasks);
         listsContainer.add(pendingPanel);
 
-        // 3️⃣ Add normal lists
+        // Normal lists
+        allLists.sort((l1, l2) -> l2.getCreatedAt().compareTo(l1.getCreatedAt()));
         for (TaskList list : allLists) {
-        TaskListPanel panel = new TaskListPanel(list);
-        listsContainer.add(panel);
+            TaskListPanel panel = new TaskListPanel(list);
+            listsContainer.add(panel);
         }
 
         listsContainer.revalidate();

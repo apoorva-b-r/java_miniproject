@@ -11,94 +11,161 @@ import com.myapp.model.TaskList;
 
 public class TaskListPanel extends JPanel {
     private final TaskList taskList;
-    private JPanel tasksPanel;
+    private JPanel previewPanel;     // shows first 2-3 tasks
+    private JPanel fullTasksPanel;   // all tasks
+    private boolean expanded = false;
     private final TaskDAO taskDAO = new TaskDAO();
-    private List<TaskItemPanel> tasks = new ArrayList<>(); // store TaskItemPanel, not Task
+    private List<TaskItemPanel> taskPanels = new ArrayList<>();
 
     public TaskListPanel(TaskList list) {
-        this.taskList = list;
-        setLayout(new BorderLayout(5, 5));
-        setBorder(BorderFactory.createTitledBorder(list.getTitle()));
+    this.taskList = list;
+    setLayout(new BorderLayout(5,5));
 
-        // Panel for tasks
-        tasksPanel = new JPanel();
-        tasksPanel.setLayout(new BoxLayout(tasksPanel, BoxLayout.Y_AXIS));
-        JScrollPane scrollPane = new JScrollPane(tasksPanel);
-        add(scrollPane, BorderLayout.CENTER);
+    // Header panel with title and Add button
+    JPanel headerPanel = new JPanel(new BorderLayout());
+    
+    JLabel titleLabel = new JLabel(list.getTitle());
+    titleLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    titleLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseClicked(java.awt.event.MouseEvent evt) {
+        openFullList();
+    }
+    });
 
-        // Input field for new tasks
-        JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
-        JTextField taskField = new JTextField();
-        JButton addTaskBtn = new JButton("Add Task");
 
-        addTaskBtn.addActionListener(_ -> showAddTaskDialog());
+    // Add Task button
+    JButton addTaskBtn = new JButton("+");
+    addTaskBtn.setToolTipText("Add new task");
+    addTaskBtn.addActionListener(_ -> showAddTaskDialog());
+    headerPanel.add(addTaskBtn, BorderLayout.EAST);
 
-        inputPanel.add(taskField, BorderLayout.CENTER);
-        inputPanel.add(addTaskBtn, BorderLayout.EAST);
-        add(inputPanel, BorderLayout.SOUTH);
+    add(headerPanel, BorderLayout.NORTH);
 
-        // Load tasks from DB
-        loadTasks();
+    // Preview panel (top 2-3 tasks)
+    previewPanel = new JPanel();
+    previewPanel.setLayout(new BoxLayout(previewPanel, BoxLayout.Y_AXIS));
+    add(previewPanel, BorderLayout.CENTER);
+
+    // Full tasks panel (hidden initially)
+    fullTasksPanel = new JPanel();
+    fullTasksPanel.setLayout(new BoxLayout(fullTasksPanel, BoxLayout.Y_AXIS));
+    fullTasksPanel.setVisible(false);
+    add(fullTasksPanel, BorderLayout.SOUTH);
+
+    // Load tasks from DB
+    loadTasks();
+
+    // Toggle expand/collapse on title click
+    titleLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            toggleExpanded();
+        }
+    });
+}
+
+
+    private void toggleExpanded() {
+        expanded = !expanded;
+        fullTasksPanel.setVisible(expanded);
+        revalidate();
+        repaint();
     }
 
     private void loadTasks() {
-        tasksPanel.removeAll();
-        tasks.clear(); // clear the panel list to avoid duplicates
+        previewPanel.removeAll();
+        fullTasksPanel.removeAll();
+        taskPanels.clear();
 
         try {
-            List<Task> taskListFromDB = taskDAO.getTasksByListId(taskList.getId());
-
-            for (Task t : taskListFromDB) {
-                TaskItemPanel taskPanel = new TaskItemPanel(t);
-                tasks.add(taskPanel);            // add panel to list
-                tasksPanel.add(taskPanel);       // add panel to UI
+            List<Task> tasks = taskDAO.getTasksByListId(taskList.getId());
+            for (int i = 0; i < tasks.size(); i++) {
+                TaskItemPanel taskPanel = new TaskItemPanel(tasks.get(i));
+                taskPanels.add(taskPanel);
+                if (i < 2) previewPanel.add(taskPanel);   // preview 2 tasks
+                fullTasksPanel.add(taskPanel);            // full list
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        tasksPanel.revalidate();
-        tasksPanel.repaint();
+        revalidate();
+        repaint();
     }
+
     public void loadTasks(List<Task> preloadedTasks) {
-    tasksPanel.removeAll();
-    tasks.clear();
+    previewPanel.removeAll();
+    fullTasksPanel.removeAll();
+    taskPanels.clear();
 
-    for (Task t : preloadedTasks) {
+    for (int i = 0; i < preloadedTasks.size(); i++) {
+        Task t = preloadedTasks.get(i);
         TaskItemPanel taskPanel = new TaskItemPanel(t);
-        tasks.add(taskPanel);
-        tasksPanel.add(taskPanel);
+        taskPanels.add(taskPanel);
+
+        // first 2 tasks go to preview
+        if (i < 2) previewPanel.add(taskPanel);
+        fullTasksPanel.add(taskPanel); // all tasks go here
     }
 
-    tasksPanel.revalidate();
-    tasksPanel.repaint();
+    revalidate();
+    repaint();
+}
+
+
+    // Optional: method to add new task
+public void addNewTask(String title, String desc) {
+    if (taskList.getId() == -1) { // pending tasks cannot add new
+        JOptionPane.showMessageDialog(this, "Cannot add tasks to Pending Tasks list.");
+        return;
     }
 
-    public void addNewTask(String title, String description) {
-        try {
-            // Create Task object
-            Task task = new Task();
-            task.setListId(taskList.getId());
-            task.setTitle(title);
-            task.setDescription(description);
-            task.setStatus("scheduled");
+    try {
+        Task task = new Task();
+        task.setListId(taskList.getId());
+        task.setTitle(title);
+        task.setDescription(desc);
+        task.setStatus("scheduled");
 
-            // Save to DB
-            taskDAO.createTask(task);
+        taskDAO.createTask(task);
 
-            // Add to UI
-            TaskItemPanel taskPanel = new TaskItemPanel(task);
-            tasks.add(0, taskPanel);          // newest first
-            tasksPanel.add(taskPanel, 0);
-            tasksPanel.revalidate();
-            tasksPanel.repaint();
+        TaskItemPanel taskPanel = new TaskItemPanel(task);
+        taskPanels.add(taskPanel);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error adding task: " + e.getMessage());
+        // Add to preview if there are less than 2 tasks currently
+        if (previewPanel.getComponentCount() < 2) {
+            previewPanel.add(taskPanel);
         }
+
+        fullTasksPanel.add(taskPanel);
+
+        revalidate();
+        repaint();
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error adding task: " + e.getMessage());
     }
+}
+
+private void openFullList() {
+    JFrame frame = new JFrame(taskList.getTitle());
+    frame.setSize(400, 500);
+    frame.setLocationRelativeTo(null);
+
+    JPanel panel = new JPanel();
+    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+    try {
+        List<Task> tasks = taskDAO.getTasksByListId(taskList.getId());
+        for (Task t : tasks) {
+            panel.add(new TaskItemPanel(t));
+        }
+    } catch (Exception e) { e.printStackTrace(); }
+
+    JScrollPane scrollPane = new JScrollPane(panel);
+    frame.add(scrollPane);
+    frame.setVisible(true);
+}
+
 
     private void showAddTaskDialog() {
         JPanel panel = new JPanel(new GridLayout(2, 2, 5, 5));

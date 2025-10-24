@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskDAO {
-    private List<TaskList> allLists;
-
-
     // Save a new list
     public TaskList saveList(TaskList list) throws SQLException {
         String sql = "INSERT INTO task_lists(user_id, title) VALUES (?, ?) RETURNING id, created_at";
