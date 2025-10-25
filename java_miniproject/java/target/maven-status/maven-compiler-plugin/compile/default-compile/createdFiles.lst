@@ -33,6 +33,7 @@ com/myapp/ui/TaskListPanel.class
 com/myapp/model/Reminder.class
 com/myapp/ui/DashboardView.class
 com/myapp/ui/TasksTab.class
+com/myapp/ui/SubjectDetailFrame.class
 com/myapp/ui/CalendarView.class
 com/myapp/ui/SubjectPanel.class
 com/myapp/ui/TaskItemPanel$1.class

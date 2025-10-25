@@ -10,13 +10,14 @@ import java.util.List;
 public class SubjectDAO {
 
     public void createSubject(Subject subject) throws SQLException {
-        String sql = "INSERT INTO subjects (user_id, name, color) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO subjects (user_id, name, color, syllabus) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, subject.getUserId());
             stmt.setString(2, subject.getName());
             stmt.setString(3, subject.getColor());
+            stmt.setString(4, subject.getSyllabus());
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
@@ -27,7 +28,7 @@ public class SubjectDAO {
 
     public List<Subject> getSubjectsByUser(int userId) throws SQLException {
         List<Subject> subjects = new ArrayList<>();
-        String sql = "SELECT id, user_id, name, color, created_at FROM subjects WHERE user_id = ? ORDER BY created_at DESC";
+        String sql = "SELECT id, user_id, name, color, syllabus, created_at FROM subjects WHERE user_id = ? ORDER BY created_at DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -40,6 +41,7 @@ public class SubjectDAO {
                     s.setUserId(rs.getInt("user_id"));
                     s.setName(rs.getString("name"));
                     s.setColor(rs.getString("color"));
+                    s.setSyllabus(rs.getString("syllabus"));
                     s.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                     subjects.add(s);
                 }
@@ -59,18 +61,19 @@ public class SubjectDAO {
     }
 
     public void updateSubject(Subject subject) throws SQLException {
-        String sql = "UPDATE subjects SET name = ?, color = ? WHERE id = ?";
+        String sql = "UPDATE subjects SET name = ?, color = ?, syllabus = ? WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, subject.getName());
             stmt.setString(2, subject.getColor());
-            stmt.setInt(3, subject.getId());
+            stmt.setString(3, subject.getSyllabus());
+            stmt.setInt(4, subject.getId());
             stmt.executeUpdate();
         }
     }
 
     public Subject getSubjectById(int id) throws SQLException {
-        String sql = "SELECT id, user_id, name, color, created_at FROM subjects WHERE id = ?";
+        String sql = "SELECT id, user_id, name, color, syllabus, created_at FROM subjects WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
@@ -82,6 +85,7 @@ public class SubjectDAO {
                     s.setUserId(rs.getInt("user_id"));
                     s.setName(rs.getString("name"));
                     s.setColor(rs.getString("color"));
+                    s.setSyllabus(rs.getString("syllabus"));
                     s.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                     return s;
                 }

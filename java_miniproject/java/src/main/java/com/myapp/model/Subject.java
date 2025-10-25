@@ -8,6 +8,7 @@ public class Subject {
     private String name;
     private String color;
     private LocalDateTime createdAt;
+    private String syllabus;
 
     public Subject() {}
 
@@ -33,6 +34,9 @@ public class Subject {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getSyllabus() { return syllabus; }
+    public void setSyllabus(String syllabus) { this.syllabus = syllabus; }
 
     @Override
     public String toString() {
