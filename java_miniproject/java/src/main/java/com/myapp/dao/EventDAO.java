@@ -3,11 +3,7 @@ package com.myapp.dao;
 import com.myapp.db.DatabaseConnection;
 import com.myapp.model.Event;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,9 +11,11 @@ public class EventDAO {
 
     // --- Save new event ---
     public void save(Event event) throws SQLException {
-        String sql = "INSERT INTO events(user_id, title, description, start_time, end_time, reminder_before_minutes, original_start_time)"
-                   + " VALUES (?,?,?,?,?,?,?)";
-
+        String sql = """
+                INSERT INTO events(user_id, title, description, start_time, end_time, reminder_before_minutes, original_start_time, subject_id)
+                VALUES (?,?,?,?,?,?,?,?)
+                """;
+        
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
@@ -28,7 +26,13 @@ public class EventDAO {
             stmt.setTimestamp(5, Timestamp.valueOf(event.getEndTime()));
             stmt.setInt(6, event.getReminderBeforeMinutes() != 0 ? event.getReminderBeforeMinutes() : 24);
             stmt.setTimestamp(7, event.getOriginalStartTime() != null ? Timestamp.valueOf(event.getOriginalStartTime()) : null);
-
+            
+            if (event.getSubjectId() != null)
+                stmt.setInt(8, event.getSubjectId());
+            else
+                stmt.setNull(8, java.sql.Types.INTEGER);
+            
+            
             stmt.executeUpdate();
 
             // Set the generated ID in Event object
@@ -40,7 +44,7 @@ public class EventDAO {
 
     // --- Update existing event ---
     public void update(Event event) throws SQLException {
-        String sql = "UPDATE events SET title = ?, description = ?, start_time = ?, end_time = ?, reminder_before_minutes = ?, original_start_time = ? WHERE id = ?";
+        String sql = "UPDATE events SET title = ?, description = ?, start_time = ?, end_time = ?, reminder_before_minutes = ?, original_start_time = ? , subject_id = ? WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -50,8 +54,13 @@ public class EventDAO {
             stmt.setTimestamp(4, Timestamp.valueOf(event.getEndTime()));
             stmt.setInt(5, event.getReminderBeforeMinutes());
             stmt.setTimestamp(6, event.getOriginalStartTime() != null ? Timestamp.valueOf(event.getOriginalStartTime()) : null);
-            stmt.setInt(7, event.getId());
 
+            if (event.getSubjectId() != null)
+                stmt.setInt(7, event.getSubjectId());
+            else 
+                stmt.setNull(7, java.sql.Types.INTEGER);
+            
+            stmt.setInt(8, event.getId());
             stmt.executeUpdate();
         }
     }
@@ -70,7 +79,13 @@ public class EventDAO {
     // --- Get all events for a user ---
     public List<Event> getEventsByUserId(int userId) throws SQLException {
         List<Event> events = new ArrayList<>();
-        String sql = "SELECT * FROM events WHERE user_id = ? ORDER BY start_time";
+        String sql = """
+                SELECT e.*, s.name AS subject_name, s.color AS subject_color
+                FROM events e
+                LEFT JOIN SUBJECTS s ON e.subject_id = s.id
+                WHERE e.user_id = ?
+                ORDER BY e.start_time
+                """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -87,7 +102,11 @@ public class EventDAO {
                     e.setEndTime(rs.getTimestamp("end_time").toLocalDateTime());
                     e.setReminderBeforeMinutes(rs.getInt("reminder_before_minutes"));
                     e.setOriginalStartTime(rs.getTimestamp("original_start_time") != null ?
-                            rs.getTimestamp("original_start_time").toLocalDateTime() : null);
+                        rs.getTimestamp("original_start_time").toLocalDateTime() : null);
+                    Object subjId = rs.getObject("subject_id");
+                    e.setSubjectId(subjId != null ? (Integer) subjId : null);
+                    e.setSubjectName(rs.getString("subject_name"));
+                    e.setSubjectColor(rs.getString("subject_color"));
                     events.add(e);
                 }
             }
@@ -126,7 +145,14 @@ public class EventDAO {
     // --- Get upcoming events (limit n) ---
     public List<Event> getUpcomingEvents(int userId, int limit) throws SQLException {
         List<Event> events = new ArrayList<>();
-        String sql = "SELECT * FROM events WHERE user_id = ? AND start_time > NOW() ORDER BY start_time ASC LIMIT ?";
+        String sql = """
+                SELECT e.*, s.name AS subject_name, s.color AS subject_color
+                FROM events e
+                LEFT JOIN subjects s ON e.subject_id = s.id
+                WHERE e.user_id = ? AND e.start_time > NOW()
+                ORDER BY e.start_time ASC
+                LIMIT ?
+                """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -146,6 +172,10 @@ public class EventDAO {
                     e.setReminderBeforeMinutes(rs.getInt("reminder_before_minutes"));
                     e.setOriginalStartTime(rs.getTimestamp("original_start_time") != null ?
                             rs.getTimestamp("original_start_time").toLocalDateTime() : null);
+                    Object subjId = rs.getObject("subject_id");
+                    e.setSubjectId(subjId != null ? (Integer) subjId : null) ;
+                    e.setSubjectName(rs.getString("subject_name"));
+                    e.setSubjectColor(rs.getString("subject_color"));
                     events.add(e);
                 }
             }

@@ -9,6 +9,10 @@ import java.util.List;
 
 public class SubjectDAO {
 
+    public List<Subject> getSubjectsByUserId(int userId) throws SQLException{
+        return getSubjectsByUser(userId);
+    }
+
     public void createSubject(Subject subject) throws SQLException {
         String sql = "INSERT INTO subjects (user_id, name, color, syllabus) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();

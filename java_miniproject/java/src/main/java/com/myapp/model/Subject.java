@@ -19,6 +19,11 @@ public class Subject {
         this.color = color;
         this.createdAt = createdAt;
     }
+    public Subject(int id, String name, String color) {
+    this.id = id;
+    this.name = name;
+    this.color = color;
+    }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -38,6 +43,7 @@ public class Subject {
     public String getSyllabus() { return syllabus; }
     public void setSyllabus(String syllabus) { this.syllabus = syllabus; }
 
+    
     @Override
     public String toString() {
         return name;

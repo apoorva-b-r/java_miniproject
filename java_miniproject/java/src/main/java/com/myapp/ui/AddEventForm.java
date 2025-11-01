@@ -1,7 +1,9 @@
 package com.myapp.ui;
 
 import com.myapp.dao.EventDAO;
+import com.myapp.dao.SubjectDAO;
 import com.myapp.model.Event;
+import com.myapp.model.Subject;
 import com.myapp.model.User;
 
 import javax.swing.*;
@@ -9,6 +11,7 @@ import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 public class AddEventForm extends JFrame {
     private JTextField txtTitle;
@@ -16,10 +19,12 @@ public class AddEventForm extends JFrame {
     private JTextField txtStartTime;
     private JTextField txtEndTime;
     private JTextField txtReminder;
+    private JComboBox<Subject> comboSubject;
 
     private final User loggedInUser;
     private final MainFrame mainFrame;
     private Event eventBeingEdited;
+
 public AddEventForm(MainFrame mainFrame, User loggedInUser) {
         this(mainFrame, loggedInUser, null);
     }
@@ -40,7 +45,7 @@ public AddEventForm(MainFrame mainFrame, User loggedInUser) {
     }
 
     private void initUI() {
-        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(7, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel lblTitle = new JLabel("Event Title:");
@@ -61,6 +66,10 @@ public AddEventForm(MainFrame mainFrame, User loggedInUser) {
         JLabel lblReminder = new JLabel("Reminder (hours before):");
         txtReminder = new JTextField("24");
 
+        JLabel lblSubject = new JLabel("Subject:");
+        comboSubject = new JComboBox<>();
+        loadSubjects();
+
         JButton btnSave = new JButton("Save");
 
         panel.add(lblTitle);
@@ -73,6 +82,8 @@ public AddEventForm(MainFrame mainFrame, User loggedInUser) {
         panel.add(txtEndTime);
         panel.add(lblReminder);
         panel.add(txtReminder);
+        panel.add(lblSubject);
+        panel.add(comboSubject);
         panel.add(new JLabel());
         panel.add(btnSave);
 
@@ -81,12 +92,38 @@ public AddEventForm(MainFrame mainFrame, User loggedInUser) {
         btnSave.addActionListener(_ -> saveEvent());
     }
 
+    private void loadSubjects(){
+        comboSubject.removeAllItems();
+        try{
+            SubjectDAO subjectDAO = new SubjectDAO();
+            List<Subject> subjects = subjectDAO.getSubjectsByUserId(loggedInUser.getId());
+            if (subjects.isEmpty()) {
+                comboSubject.addItem(new Subject(0, "No subjects available","#808080"));
+                comboSubject.setEnabled(false);
+            }
+            else{
+                for (Subject s : subjects) comboSubject.addItem(s);
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro loading subject: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
     private void populateFields(Event e) {
         txtTitle.setText(e.getTitle());
         txtDescription.setText(e.getDescription());
         txtStartTime.setText(e.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         txtEndTime.setText(e.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         txtReminder.setText(String.valueOf(e.getReminderBeforeMinutes()/60));
+        if (e.getSubjectId() != null){
+            for (int i = 0 ; i< comboSubject.getItemCount() ; i++){
+                Subject s = comboSubject.getItemAt(i);
+                if (s.getId() == e.getSubjectId()){
+                    comboSubject.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 
     private void saveEvent() {
@@ -146,6 +183,13 @@ public AddEventForm(MainFrame mainFrame, User loggedInUser) {
         event.setStartTime(startTime);
         event.setEndTime(endTime);
         event.setReminderBeforeMinutes(reminder * 60);
+
+        Subject selectedSubject = (Subject) comboSubject.getSelectedItem();
+        if (selectedSubject != null && selectedSubject.getId() != 0){
+            event.setSubjectId(selectedSubject.getId());
+        }else{
+            event.setSubjectId(null);
+        }
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override

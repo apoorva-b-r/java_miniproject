@@ -12,6 +12,9 @@ public class Event {
     private int reminderBeforeMinutes; // reminder in minutes
     private LocalDateTime originalStartTime;
     private LocalDateTime createdAt;
+    private Integer subjectId;
+    private String subjectName;
+    private String subjectColor;
 
     // --- Constructor ---
     public Event() {
@@ -23,6 +26,7 @@ public class Event {
         this.reminderBeforeMinutes = 24 * 60; // Default reminder: 24 hours before
         this.originalStartTime = this.startTime;
         this.createdAt = LocalDateTime.now();
+        this.subjectId = null;
     }
 
     // --- Getters ---
@@ -35,6 +39,9 @@ public class Event {
     public int getReminderBeforeMinutes() { return reminderBeforeMinutes; }
     public LocalDateTime getOriginalStartTime() { return originalStartTime; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public Integer getSubjectId(){ return subjectId; }
+    public String getSubjectName(){ return subjectName; }
+    public String getSubjectColor(){ return subjectColor; }
 
     // --- Setters ---
     public void setId(int id) { this.id = id; }
@@ -46,4 +53,7 @@ public class Event {
     public void setReminderBeforeMinutes(int reminderBeforeMinutes) { this.reminderBeforeMinutes = reminderBeforeMinutes; }
     public void setOriginalStartTime(LocalDateTime originalStartTime) { this.originalStartTime = originalStartTime; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setSubjectId(Integer subjectId) { this.subjectId = subjectId; }
+    public void setSubjectName(String subjectName) { this.subjectName = subjectName; }
+    public void setSubjectColor(String subjectColor) { this.subjectColor = subjectColor; }
 }

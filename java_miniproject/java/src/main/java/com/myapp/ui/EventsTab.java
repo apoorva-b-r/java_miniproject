@@ -104,14 +104,38 @@ public class EventsTab extends JPanel {
                 List<Event> dayEvents = eventsByDate.get(date);
                 if (dayEvents != null) {
                     for (Event e : dayEvents) {
-                        JButton eventBtn = new JButton(e.getTitle());
-                        eventBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-                        eventBtn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-                        eventBtn.setMargin(new Insets(2, 2, 2, 2));
-                        eventBtn.addActionListener(_ -> showEventDetails(e));
-                        dayCell.add(eventBtn);
+                    JButton eventBtn = new JButton(e.getTitle());
+                    eventBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+                    eventBtn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                    eventBtn.setMargin(new Insets(2, 4, 2, 4));
+                    eventBtn.addActionListener(_ -> showEventDetails(e));
+
+                    // 🎨 Apply subject color if available
+                    String colorHex = e.getSubjectColor();
+                    if (colorHex != null && !colorHex.isEmpty()) {
+                        try {
+                            Color c = Color.decode(colorHex);
+                            eventBtn.setBackground(c);
+                            // auto-pick a readable text color
+                            int brightness = (c.getRed() + c.getGreen() + c.getBlue()) / 3;
+                            eventBtn.setForeground(brightness < 128 ? Color.WHITE : Color.BLACK);
+                        } catch (Exception ex) {
+                            eventBtn.setBackground(new Color(200, 200, 200));
+                            eventBtn.setForeground(Color.BLACK);
+                        }
+                    } else {
+                        eventBtn.setBackground(new Color(220, 220, 220));
+                        eventBtn.setForeground(Color.BLACK);
                     }
-                }
+
+                            eventBtn.setFocusPainted(false);
+                            eventBtn.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 1));
+                            eventBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+                            dayCell.add(eventBtn);
+                        }
+                    }
+
 
                 calendarPanel.add(dayCell);
             }
