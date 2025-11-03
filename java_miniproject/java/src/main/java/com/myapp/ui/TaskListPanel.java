@@ -17,50 +17,55 @@ public class TaskListPanel extends JPanel {
     private final TaskDAO taskDAO = new TaskDAO();
     private List<TaskItemPanel> taskPanels = new ArrayList<>();
 
-    public TaskListPanel(TaskList list) {
-    this.taskList = list;
-    setLayout(new BorderLayout(5,5));
+public TaskListPanel(TaskList taskList) {
+    this.taskList = taskList;
+    this.taskPanels = new ArrayList<>();
 
-    // Header panel with title and Add button
-    JPanel headerPanel = new JPanel(new BorderLayout());
-    
-    JLabel titleLabel = new JLabel(list.getTitle());
-    titleLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-    titleLabel.addMouseListener(new java.awt.event.MouseAdapter() {
-    public void mouseClicked(java.awt.event.MouseEvent evt) {
-        openFullList();
-    }
-    });
+    setLayout(new BorderLayout(10, 10));
+    setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true));
+    setBackground(Color.WHITE);
 
+    // ---- Header ----
+// ---- Header ----
+JLabel titleLabel = new JLabel(taskList.getTitle());
+titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
 
-    // Add Task button
-    JButton addTaskBtn = new JButton("+");
-    addTaskBtn.setToolTipText("Add new task");
-    addTaskBtn.addActionListener(_ -> showAddTaskDialog());
-    headerPanel.add(addTaskBtn, BorderLayout.EAST);
+JButton expandButton = new JButton("▼");
+expandButton.addActionListener(_ -> toggleExpanded());
 
-    add(headerPanel, BorderLayout.NORTH);
+// ✅ Add Task button
+JButton addTaskBtn = new JButton("+");
+addTaskBtn.setToolTipText("Add new task");
+addTaskBtn.addActionListener(_ -> showAddTaskDialog());
 
-    // Preview panel (top 2-3 tasks)
+// Put both buttons on the right side
+JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+rightButtons.setOpaque(false);
+rightButtons.add(addTaskBtn);
+rightButtons.add(expandButton);
+
+JPanel headerPanel = new JPanel(new BorderLayout());
+headerPanel.setBackground(new Color(245, 245, 245));
+headerPanel.add(titleLabel, BorderLayout.WEST);
+headerPanel.add(rightButtons, BorderLayout.EAST);
+
+add(headerPanel, BorderLayout.NORTH);
+
+    // ---- Task Panels ----
     previewPanel = new JPanel();
     previewPanel.setLayout(new BoxLayout(previewPanel, BoxLayout.Y_AXIS));
-    add(previewPanel, BorderLayout.CENTER);
+    previewPanel.setBackground(Color.WHITE);
 
-    // Full tasks panel (hidden initially)
     fullTasksPanel = new JPanel();
     fullTasksPanel.setLayout(new BoxLayout(fullTasksPanel, BoxLayout.Y_AXIS));
-    fullTasksPanel.setVisible(false);
+    fullTasksPanel.setBackground(new Color(250, 250, 250));
+    fullTasksPanel.setVisible(false); // collapsed by default
+
+    add(previewPanel, BorderLayout.CENTER);
     add(fullTasksPanel, BorderLayout.SOUTH);
 
-    // Load tasks from DB
-    loadTasks();
-
-    // Toggle expand/collapse on title click
-    titleLabel.addMouseListener(new java.awt.event.MouseAdapter() {
-        public void mouseClicked(java.awt.event.MouseEvent evt) {
-            toggleExpanded();
-        }
-    });
+    revalidate();
+    repaint();
 }
 
 
@@ -92,27 +97,31 @@ public class TaskListPanel extends JPanel {
         repaint();
     }
 
-    public void loadTasks(List<Task> preloadedTasks) {
+public void loadTasks(List<Task> preloadedTasks) {
+    System.out.println("Loading " + preloadedTasks.size() + " tasks into list: " + taskList.getTitle());
+
     previewPanel.removeAll();
     fullTasksPanel.removeAll();
     taskPanels.clear();
 
     for (int i = 0; i < preloadedTasks.size(); i++) {
         Task t = preloadedTasks.get(i);
+        System.out.println(" -> Adding " + t.getTitle());
         TaskItemPanel taskPanel = new TaskItemPanel(t);
         taskPanels.add(taskPanel);
 
-        // first 2 tasks go to preview
         if (i < 2) previewPanel.add(taskPanel);
-        fullTasksPanel.add(taskPanel); // all tasks go here
+        fullTasksPanel.add(taskPanel);
     }
 
-    revalidate();
-    repaint();
+    previewPanel.revalidate();
+    fullTasksPanel.revalidate();
+    previewPanel.repaint();
+    fullTasksPanel.repaint();
 }
 
 
-    // Optional: method to add new task
+// Optional: method to add new task
 public void addNewTask(String title, String desc) {
     if (taskList.getId() == -1) { // pending tasks cannot add new
         JOptionPane.showMessageDialog(this, "Cannot add tasks to Pending Tasks list.");
@@ -122,21 +131,17 @@ public void addNewTask(String title, String desc) {
     try {
         Task task = new Task();
         task.setListId(taskList.getId());
+        task.setUserId(taskList.getUserId());
         task.setTitle(title);
         task.setDescription(desc);
         task.setStatus("scheduled");
 
+        // Save to DB
         taskDAO.createTask(task);
+        System.out.println("Saved task with title: " + title + ", listId: " + taskList.getId());
 
-        TaskItemPanel taskPanel = new TaskItemPanel(task);
-        taskPanels.add(taskPanel);
-
-        // Add to preview if there are less than 2 tasks currently
-        if (previewPanel.getComponentCount() < 2) {
-            previewPanel.add(taskPanel);
-        }
-
-        fullTasksPanel.add(taskPanel);
+        // ✅ Reload everything from DB so UI matches actual saved data
+        loadTasks();
 
         revalidate();
         repaint();

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public class Task {
     private int id;
+    private int userId;
     private int listId;
     private String title;
     private String description;
@@ -14,6 +15,9 @@ public class Task {
     // --- Getters & Setters ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
     public int getListId() { return listId; }
     public void setListId(int listId) { this.listId = listId; }
