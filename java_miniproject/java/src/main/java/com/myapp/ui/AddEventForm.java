@@ -204,22 +204,27 @@ public AddEventForm(MainFrame mainFrame, User loggedInUser) {
             }
 
             @Override
-            protected void done() {
-                try {
-                    mainFrame.refreshAllViews();
-                    JOptionPane.showMessageDialog(AddEventForm.this,
-                            eventBeingEdited != null ? "Event updated successfully!" : "Event added successfully!",
-                            "Success",
-                            JOptionPane.INFORMATION_MESSAGE);
-                    dispose();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(AddEventForm.this,
-                            "Error saving event: " + ex.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
+protected void done() {
+    try {
+        mainFrame.refreshAllViews();
+
+        // ✅ restart the reminder checker so new events get tracked immediately
+        mainFrame.restartReminderChecker();
+
+        JOptionPane.showMessageDialog(AddEventForm.this,
+                eventBeingEdited != null ? "Event updated successfully!" : "Event added successfully!",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(AddEventForm.this,
+                "Error saving event: " + ex.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
+}
+
         };
         worker.execute();
     }

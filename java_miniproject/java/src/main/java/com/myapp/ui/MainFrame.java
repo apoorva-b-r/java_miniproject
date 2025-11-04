@@ -1,9 +1,12 @@
 package com.myapp.ui;
 
 import com.myapp.model.User;
+import com.myapp.service.EventReminderService;
+import com.myapp.model.Event;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class MainFrame extends JFrame {
     private final CardLayout cardLayout = new CardLayout();
@@ -14,6 +17,10 @@ public class MainFrame extends JFrame {
     private final TasksTab tasksTab;
     private final User loggedInUser;
     private final SubjectsTab subjectsTab;
+    private final EventReminderService eventReminderService = new EventReminderService();
+
+    // 🕒 Timer reference
+    private java.util.Timer reminderTimer;
 
     public MainFrame(User user) {
         this.loggedInUser = user;
@@ -29,6 +36,8 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        startReminderChecker(); // ✅ start reminder system
 
         // Sidebar
         JPanel sidePanel = new JPanel();
@@ -76,6 +85,72 @@ public class MainFrame extends JFrame {
         btnSubjects.addActionListener(_ -> cardLayout.show(contentPanel, "subjects"));
 
         setVisible(true);
+    }
+
+    // ✅ Single correct version of reminder checker
+    private void startReminderChecker() {
+    if (reminderTimer != null) {
+        reminderTimer.cancel();
+    }
+
+    reminderTimer = new java.util.Timer(true); // daemon timer
+    System.out.println("🟢 Daily reminder checker started...");
+
+    reminderTimer.scheduleAtFixedRate(new java.util.TimerTask() {
+        @Override
+        public void run() {
+            try {
+                System.out.println("📅 Checking today's reminders at: " + java.time.LocalDateTime.now());
+
+                // Fetch all reminders due today (you can adjust query logic in EventReminderService)
+                List<Event> todaysEvents = eventReminderService.fetchTodayReminders(loggedInUser.getId());
+
+                if (!todaysEvents.isEmpty()) {
+                    System.out.println("🎯 Found " + todaysEvents.size() + " event(s) for today.");
+
+                    // Build one popup message
+                    StringBuilder message = new StringBuilder("📆 Today's Events:\n\n");
+                    for (Event event : todaysEvents) {
+                        message.append("• ")
+                               .append(event.getTitle())
+                               .append(" — 🕒 ")
+                               .append(event.getStartTime())
+                               .append("\n");
+                    }
+
+                    // Show ONE reminder popup for all events
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(
+                            MainFrame.this,
+                            message.toString(),
+                            "⏰ Daily Reminder",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+
+                        // Mark all as shown AFTER showing popup
+                        for (Event event : todaysEvents) {
+                            try {
+                                eventReminderService.markReminderShown(event.getId());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } else {
+                    System.out.println("😴 No events for today or all already shown.");
+                }
+            } catch (Exception ex) {
+                System.err.println("❌ Error in reminder checker:");
+                ex.printStackTrace();
+            }
+        }
+    }, 0, 60 * 60 * 1000); // 🔁 check every 1 hour
+}
+
+
+    // ✅ Allows restart when new event added
+    public void restartReminderChecker() {
+        startReminderChecker();
     }
 
     public void refreshAllViews() {
