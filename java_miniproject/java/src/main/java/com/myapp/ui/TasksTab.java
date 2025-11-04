@@ -2,6 +2,7 @@ package com.myapp.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,8 +126,35 @@ public void reloadTasks() {
         TaskList pendingList = new TaskList();
         pendingList.setId(-1);
         pendingList.setTitle("Pending Tasks");
+
+
+        // Get current time and filter
+        LocalDateTime now = LocalDateTime.now();
+
         List<Task> pendingTasks = allTasks.stream()
-            .filter(t -> !"completed".equalsIgnoreCase(t.getStatus()))
+            .filter(task -> {
+                // Find parent list of this task
+                TaskList parentList = allLists.stream()
+                        .filter(l -> l.getId() == task.getListId())
+                        .findFirst()
+                        .orElse(null);
+
+                // Skip if no parent list found
+                if (parentList == null) return false;
+
+                // Skip if subject-based list
+                if (parentList.getTitle().toLowerCase().contains("subject")) return false;
+
+                // Check 24 hours rule
+                LocalDateTime createdAt = parentList.getCreatedAt();
+                if (createdAt == null) return false;
+
+                long hoursSinceCreated = java.time.Duration.between(createdAt, now).toHours();
+
+                // ✅ Include only if older than 24 hours AND not completed
+                return hoursSinceCreated >= 24 &&
+                    !"completed".equalsIgnoreCase(task.getStatus());
+            })
             .toList();
         TaskListPanel pendingPanel = new TaskListPanel(pendingList);
         pendingPanel.loadTasks(pendingTasks);

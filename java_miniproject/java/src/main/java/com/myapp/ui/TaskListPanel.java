@@ -84,7 +84,13 @@ add(headerPanel, BorderLayout.NORTH);
         try {
             List<Task> tasks = taskDAO.getTasksByListId(taskList.getId());
             for (int i = 0; i < tasks.size(); i++) {
-                TaskItemPanel taskPanel = new TaskItemPanel(tasks.get(i));
+                TaskItemPanel taskPanel = new TaskItemPanel(tasks.get(i), () -> {
+                // When status changes, refresh pending section via parent TasksTab
+                Container parent = SwingUtilities.getAncestorOfClass(TasksTab.class, this);
+                if (parent instanceof TasksTab tasksTab) {
+                    tasksTab.reloadTasks();  // 🔄 refresh everything dynamically
+                }
+                });
                 taskPanels.add(taskPanel);
                 if (i < 2) previewPanel.add(taskPanel);   // preview 2 tasks
                 fullTasksPanel.add(taskPanel);            // full list
@@ -107,7 +113,13 @@ public void loadTasks(List<Task> preloadedTasks) {
     for (int i = 0; i < preloadedTasks.size(); i++) {
         Task t = preloadedTasks.get(i);
         System.out.println(" -> Adding " + t.getTitle());
-        TaskItemPanel taskPanel = new TaskItemPanel(t);
+        TaskItemPanel taskPanel = new TaskItemPanel(preloadedTasks.get(i), () -> {
+        // When status changes, refresh pending section via parent TasksTab
+        Container parent = SwingUtilities.getAncestorOfClass(TasksTab.class, this);
+        if (parent instanceof TasksTab tasksTab) {
+            tasksTab.reloadTasks();  // 🔄 refresh everything dynamically
+        }
+        });
         taskPanels.add(taskPanel);
 
         if (i < 2) previewPanel.add(taskPanel);
@@ -162,10 +174,15 @@ private void openFullList() {
     try {
         List<Task> tasks = taskDAO.getTasksByListId(taskList.getId());
         for (Task t : tasks) {
-            panel.add(new TaskItemPanel(t));
+    panel.add(new TaskItemPanel(t, () -> {
+        Container parent = SwingUtilities.getAncestorOfClass(TasksTab.class, this);
+        if (parent instanceof TasksTab tasksTab) {
+            tasksTab.reloadTasks();
+        }
+    }));
         }
     } catch (Exception e) { e.printStackTrace(); }
-
+    loadTasks();
     JScrollPane scrollPane = new JScrollPane(panel);
     frame.add(scrollPane);
     frame.setVisible(true);
