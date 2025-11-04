@@ -12,9 +12,11 @@ public class SubjectsTab extends JPanel {
     private final User loggedInUser;
     private final SubjectDAO subjectDAO = new SubjectDAO();
     private final JPanel subjectsContainer = new JPanel();
+    private final TasksTab tasksTab;
 
-    public SubjectsTab(User user) {
+    public SubjectsTab(User user, TasksTab tasksTab) {
         this.loggedInUser = user;
+        this.tasksTab = tasksTab;
         setLayout(new BorderLayout(10, 10));
 
         JLabel title = new JLabel("📚 Your Subjects", SwingConstants.CENTER);
@@ -81,6 +83,9 @@ public class SubjectsTab extends JPanel {
                 syllabusArea.setText("");
                 colorButton.setBackground(null);
                 reloadSubjects();
+                if (tasksTab != null) {
+                tasksTab.addListForSubject(subject);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(this, "Error adding subject: " + e.getMessage());

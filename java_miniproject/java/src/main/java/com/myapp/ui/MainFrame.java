@@ -29,7 +29,7 @@ public class MainFrame extends JFrame {
         calendarView = new CalendarView(loggedInUser);
         eventsTab = new EventsTab(loggedInUser, this);
         tasksTab = new TasksTab(loggedInUser);
-        subjectsTab = new SubjectsTab(loggedInUser);
+        subjectsTab = new SubjectsTab(loggedInUser, tasksTab);
 
         setTitle("Study Productivity App");
         setSize(900, 600);
