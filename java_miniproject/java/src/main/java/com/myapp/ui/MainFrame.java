@@ -49,6 +49,8 @@ public class MainFrame extends JFrame {
         JButton btnLogout = new JButton("🚪 Logout");
         JButton btnSubjects = new JButton("📚 Subjects");
 
+        sidePanel.add(btnProfile);
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 10)));
         sidePanel.add(Box.createVerticalGlue());
         sidePanel.add(btnHome);
         sidePanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -56,12 +58,10 @@ public class MainFrame extends JFrame {
         sidePanel.add(Box.createRigidArea(new Dimension(0, 10)));
         sidePanel.add(btnTasks);
         sidePanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        sidePanel.add(btnProfile);
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        sidePanel.add(btnLogout);
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 10)));
         sidePanel.add(btnSubjects);
         sidePanel.add(Box.createVerticalGlue());
+        sidePanel.add(btnLogout);
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         contentPanel.add(dashboardView, "dashboard");
         contentPanel.add(eventsTab, "events");
