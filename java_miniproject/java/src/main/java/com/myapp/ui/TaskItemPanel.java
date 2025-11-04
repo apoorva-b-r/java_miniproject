@@ -8,13 +8,15 @@ import com.myapp.model.Task;
 public class TaskItemPanel extends JPanel {
     private final Task task;
     private final TaskDAO taskDAO = new TaskDAO();
+    private final Runnable onStatusChange;
     private JLabel titleLabel;
     private JButton editButton;
     private JButton deleteButton;
     private JCheckBox doneCheckBox;
 
-    public TaskItemPanel(Task task) {
+    public TaskItemPanel(Task task, Runnable onStatusChange) {
         this.task = task;
+        this.onStatusChange = onStatusChange;
         setLayout(new BorderLayout(5, 5));
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
@@ -41,14 +43,15 @@ public class TaskItemPanel extends JPanel {
         // ---- Handlers ----
 
         // Toggle complete/incomplete
-        doneCheckBox.addActionListener(_ -> {
-            task.setStatus(doneCheckBox.isSelected() ? "completed" : "scheduled");
-            try {
-                taskDAO.updateTaskStatus(task);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+doneCheckBox.addActionListener(_ -> {
+    task.setStatus(doneCheckBox.isSelected() ? "completed" : "scheduled");
+    try {
+        taskDAO.updateTaskStatus(task);
+        if (onStatusChange != null) onStatusChange.run(); // 🔥 Notify parent
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+});
 
         // Click on title -> show info
         titleLabel.addMouseListener(new java.awt.event.MouseAdapter() {
