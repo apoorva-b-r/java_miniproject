@@ -10,6 +10,8 @@ import com.myapp.dao.TaskListDAO;
 import com.myapp.model.Task;
 import com.myapp.model.TaskList;
 import com.myapp.model.User;
+import com.myapp.dao.SubjectDAO;
+import com.myapp.model.Subject;
 
 public class TasksTab extends JPanel {
 
@@ -18,6 +20,7 @@ public class TasksTab extends JPanel {
     private final TaskDAO taskDAO = new TaskDAO();
     private final TaskListDAO listDAO = new TaskListDAO();
     private final List<TaskListPanel> taskLists = new ArrayList<>();
+    private final SubjectDAO subjectDAO = new SubjectDAO();
 
     public TasksTab(User user) {
         this.loggedInUser = user;
@@ -75,6 +78,27 @@ public class TasksTab extends JPanel {
         }
     }
 
+    public void addListForSubject(Subject subject) {
+    try {
+        TaskList newList = new TaskList();
+        newList.setUserId(loggedInUser.getId());
+        newList.setTitle(subject.getName());
+        newList.setCreatedAt(java.time.LocalDateTime.now());
+
+        listDAO.createTaskList(newList);
+
+        // Instantly add to UI
+        TaskListPanel listPanel = new TaskListPanel(newList);
+        listsContainer.add(listPanel);
+        listsContainer.revalidate();
+        listsContainer.repaint();
+
+        System.out.println("✅ Created new task list for subject: " + subject.getName());
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
 public void reloadTasks() {
     listsContainer.removeAll();
     taskLists.clear();
@@ -82,40 +106,50 @@ public void reloadTasks() {
     try {
         List<TaskList> allLists = listDAO.getListsByUserId(loggedInUser.getId());
         List<Task> allTasks = taskDAO.getAllTasks(loggedInUser.getId());
+        List<Subject> allSubjects = subjectDAO.getSubjectsByUserId(loggedInUser.getId());
 
-        // Pending tasks panel
+        // ✅ Ensure every subject has a matching task list
+        for (Subject subject : allSubjects) {
+            boolean exists = allLists.stream()
+                .anyMatch(l -> l.getTitle().equalsIgnoreCase(subject.getName() + " Tasks"));
+            if (!exists) {
+                TaskList newList = new TaskList();
+                newList.setUserId(loggedInUser.getId());
+                newList.setTitle(subject.getName() + " Tasks");
+                listDAO.createTaskList(newList);
+                allLists.add(newList);
+            }
+        }
+
+        // ✅ Optional: Pending Tasks section
         TaskList pendingList = new TaskList();
         pendingList.setId(-1);
         pendingList.setTitle("Pending Tasks");
-
         List<Task> pendingTasks = allTasks.stream()
             .filter(t -> !"completed".equalsIgnoreCase(t.getStatus()))
             .toList();
-
         TaskListPanel pendingPanel = new TaskListPanel(pendingList);
-        listsContainer.add(pendingPanel);
-        listsContainer.revalidate();
-        listsContainer.repaint();
         pendingPanel.loadTasks(pendingTasks);
+        listsContainer.add(pendingPanel);
 
-        // Normal lists
+        // ✅ Now load each task list panel
         allLists.sort((l1, l2) -> l2.getCreatedAt().compareTo(l1.getCreatedAt()));
-        for (TaskList list : allLists) {
-            TaskListPanel card = new TaskListPanel(list);
-            listsContainer.add(card);
-            listsContainer.revalidate();
-            listsContainer.repaint();
 
+        for (TaskList list : allLists) {
             List<Task> tasksForList = allTasks.stream()
                 .filter(t -> t.getListId() == list.getId())
                 .toList();
 
+            TaskListPanel card = new TaskListPanel(list);
             card.loadTasks(tasksForList);
+            listsContainer.add(card);
+
             System.out.println("List: " + list.getTitle() + " -> " + tasksForList.size() + " tasks");
         }
 
         listsContainer.revalidate();
         listsContainer.repaint();
+
     } catch (Exception e) {
         e.printStackTrace();
     }
