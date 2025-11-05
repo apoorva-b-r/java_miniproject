@@ -31,7 +31,8 @@ public class TasksTab extends JPanel {
         add(title, BorderLayout.NORTH);
 
         // Container for all lists
-        listsContainer = new JPanel(new GridLayout(0, 2, 10, 10)); // 2 columns, auto rows
+        listsContainer = new JPanel();
+        listsContainer.setLayout(new BoxLayout(listsContainer, BoxLayout.Y_AXIS));
         JScrollPane scrollPane = new JScrollPane(listsContainer);
         add(scrollPane, BorderLayout.CENTER);
 

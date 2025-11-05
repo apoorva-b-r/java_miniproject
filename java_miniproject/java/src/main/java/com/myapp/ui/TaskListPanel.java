@@ -31,7 +31,7 @@ JLabel titleLabel = new JLabel(taskList.getTitle());
 titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
 
 JButton expandButton = new JButton("▼");
-expandButton.addActionListener(_ -> toggleExpanded());
+expandButton.addActionListener(_ -> toggleExpanded(expandButton));
 
 // ✅ Add Task button
 JButton addTaskBtn = new JButton("+");
@@ -69,12 +69,13 @@ add(headerPanel, BorderLayout.NORTH);
 }
 
 
-    private void toggleExpanded() {
-        expanded = !expanded;
-        fullTasksPanel.setVisible(expanded);
-        revalidate();
-        repaint();
-    }
+private void toggleExpanded(JButton expandButton) {
+    expanded = !expanded;
+    fullTasksPanel.setVisible(expanded);
+    expandButton.setText(expanded ? "▲" : "▼");
+    revalidate();
+    repaint();
+}
 
     private void loadTasks() {
         previewPanel.removeAll();
