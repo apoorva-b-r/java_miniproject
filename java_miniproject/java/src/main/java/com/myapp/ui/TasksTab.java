@@ -11,7 +11,6 @@ import com.myapp.dao.TaskListDAO;
 import com.myapp.model.Task;
 import com.myapp.model.TaskList;
 import com.myapp.model.User;
-import com.myapp.dao.SubjectDAO;
 import com.myapp.model.Subject;
 
 public class TasksTab extends JPanel {
@@ -21,7 +20,6 @@ public class TasksTab extends JPanel {
     private final TaskDAO taskDAO = new TaskDAO();
     private final TaskListDAO listDAO = new TaskListDAO();
     private final List<TaskListPanel> taskLists = new ArrayList<>();
-    private final SubjectDAO subjectDAO = new SubjectDAO();
 
     public TasksTab(User user) {
         this.loggedInUser = user;
@@ -107,20 +105,6 @@ public void reloadTasks() {
     try {
         List<TaskList> allLists = listDAO.getListsByUserId(loggedInUser.getId());
         List<Task> allTasks = taskDAO.getAllTasks(loggedInUser.getId());
-        List<Subject> allSubjects = subjectDAO.getSubjectsByUserId(loggedInUser.getId());
-
-        // ✅ Ensure every subject has a matching task list
-        for (Subject subject : allSubjects) {
-            boolean exists = allLists.stream()
-                .anyMatch(l -> l.getTitle().equalsIgnoreCase(subject.getName() + " Tasks"));
-            if (!exists) {
-                TaskList newList = new TaskList();
-                newList.setUserId(loggedInUser.getId());
-                newList.setTitle(subject.getName() + " Tasks");
-                listDAO.createTaskList(newList);
-                allLists.add(newList);
-            }
-        }
 
         // ✅ Optional: Pending Tasks section
         TaskList pendingList = new TaskList();
