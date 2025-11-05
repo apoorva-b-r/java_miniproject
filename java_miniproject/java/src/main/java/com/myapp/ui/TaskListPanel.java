@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.myapp.dao.TaskDAO;
+import com.myapp.dao.TaskListDAO;
 import com.myapp.model.Task;
 import com.myapp.model.TaskList;
 
@@ -38,11 +39,48 @@ JButton addTaskBtn = new JButton("+");
 addTaskBtn.setToolTipText("Add new task");
 addTaskBtn.addActionListener(_ -> showAddTaskDialog());
 
+
 // Put both buttons on the right side
 JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
 rightButtons.setOpaque(false);
 rightButtons.add(addTaskBtn);
 rightButtons.add(expandButton);
+// ✅ Only show delete button for *daily lists* (no subjectId)
+if ((taskList.getSubjectId() == null || taskList.getSubjectId() == 0) && !"Pending Tasks".equalsIgnoreCase(taskList.getTitle())) {
+    JButton deleteBtn = new JButton("🗑️");
+    deleteBtn.setToolTipText("Delete this list");
+
+    deleteBtn.addActionListener(e -> {
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to delete this task list?",
+            "Confirm Delete",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                TaskListDAO dao = new TaskListDAO();
+                boolean success = dao.deleteTaskList(taskList.getId(), taskList.getUserId());
+                if (success) {
+                    Container parent = this.getParent();
+                    if (parent != null) {
+                        parent.remove(this);
+                        parent.revalidate();
+                        parent.repaint();
+                    }
+                    JOptionPane.showMessageDialog(this, "List deleted successfully!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to delete list.");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error deleting list: " + ex.getMessage());
+            }
+        }
+    });
+
+    rightButtons.add(deleteBtn); // 🗑️ add only for daily
+}
 
 JPanel headerPanel = new JPanel(new BorderLayout());
 headerPanel.setBackground(new Color(245, 245, 245));

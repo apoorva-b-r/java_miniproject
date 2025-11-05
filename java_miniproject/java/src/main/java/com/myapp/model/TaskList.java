@@ -6,13 +6,13 @@ public class TaskList {
     private int id;
     private int userId;
     private String title;
-    private int subjectId;
+    private Integer subjectId;
     private String description;
     private LocalDateTime createdAt;
 
     public TaskList() {}
 
-    public TaskList(int id, String title, int subjectId) {
+    public TaskList(int id, String title, Integer subjectId) {
         this.id = id;
         this.title = title;
         this.subjectId = subjectId;
@@ -27,8 +27,8 @@ public class TaskList {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
-    public int getSubjectId() { return subjectId; }
-    public void setSubjectId(int subjectId) { this.subjectId = subjectId; }
+    public Integer getSubjectId() { return subjectId; }
+    public void setSubjectId(Integer subjectId) { this.subjectId = subjectId; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
